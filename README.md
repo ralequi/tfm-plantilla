@@ -30,7 +30,7 @@ $ USE="X cjk context detex dvi2tty epspdf extra graphics humanities jadetex luat
 ```
 
 ### Windows
-[Instalar proTeXt](https://tug.org/protext/)
+[Instalar proTeXt](https://tug.org/protext/) o [Instalar TeXLive](https://www.tug.org/texlive/)
 
 ### Mac/OS X
 [Instalar MacTeX](https://tug.org/mactex/)
