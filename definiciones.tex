@@ -1,5 +1,5 @@
 % Clase del documento
-\documentclass[a4paper,12pt,twoside,openright,titlepage]{book}
+\documentclass[a4paper,11pt,twoside,openright,titlepage]{book}
 
 %
 % Paquetes necesarios
@@ -10,7 +10,7 @@
 % Codificación UTF8
 \usepackage[utf8]{inputenc}
 % Caracteres del español
-\usepackage[spanish]{babel}
+\usepackage[spanish, es-tabla]{babel}
 % Código, algoritmos, etc.
 \usepackage{listings}
 % Definición de colores
@@ -59,10 +59,10 @@
 \usepackage[acronym]{glossaries}
 % Fuentes
 \usepackage[T1]{fontenc}
-% Bibliografía
-\usepackage[sorting=none,natbib=true,backend=bibtex,bibencoding=ascii]{biblatex}
-% Fix biblatex+babel warning
-\usepackage{csquotes}
+% Tablas con Multifila y Multicolumna
+\usepackage{multirow}
+% Bibliografía (Ordenacion, etc)
+\usepackage{cite}
 
 % Enlaces
 \hypersetup{hidelinks,pageanchor=true,colorlinks,citecolor=Fuchsia,urlcolor=black,linkcolor=Cerulean}

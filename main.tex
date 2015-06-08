@@ -24,9 +24,6 @@
 \makeglossaries
 \input{src/glosario}
 
-% Rerefencias
-\bibliography{src/bibliografia}
-
 % Inicio del documento
 \begin{document}
 
@@ -122,7 +119,9 @@
 %
 % Bibliografía
 %
-\printbibliography[heading=bibintoc]
+% Rerefencias
+\bibliographystyle{IEEEtran}
+\bibliography{src/bibliografia}
 
 % No expandir elementos para llenar toda la página
 \raggedbottom
