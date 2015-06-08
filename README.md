@@ -1,4 +1,4 @@
-Plantilla en *LaTeX* para el **Trabajo de Fin de Grado** (EPS-UAM). Contiene la estructura básica para la memoria del mismo, siguiendo la [normativa del curso 2014-2015](2014-2015/).
+Plantilla en *LaTeX* para el **Trabajo de Fin de Master** (EPS-UAM). Contiene la estructura básica para la memoria del mismo, siguiendo la [normativa del curso 2014-2015](2014-2015/).
 
 - Para completar y adaptar la plantilla, busca en el proyecto la palabra clave `TODO` y sobreescribe el nombre de tu trabajo, tutor, etc.
 - Para manejar la bibliografía se puede utilizar [JabRef](https://github.com/JabRef/jabref), editando [src/bibliografia.bib](src/bibliografia.bib)
@@ -49,7 +49,7 @@ Este proyecto ha sido desarrollado por:
 - Rafael Leira Osuna ([@ralequi](https://github.com/ralequi))
 - Jose Fernando Zazo ([@jfzazo](https://github.com/jfzazo))
 - Mario Daniel Ruiz Noguera ([@mariodruiz](https://github.com/mariodruiz))
-- Sid ([@JSidrach](https://github.com/JSidrach))
+- Sid ([@JSidrach](https://github.com/JSidrach)), al que hay que agradecer en especial su contribución a la creación de una plantilla facil de utilizar, así como la primera versión de github disponible
 - Pablo Molins ([@molins](https://github.com/molins))
 
 Licencia
