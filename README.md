@@ -1,4 +1,4 @@
-Plantilla en *LaTeX* para el **Trabajo de Fin de Master** (EPS-UAM). Contiene la estructura básica para la memoria del mismo, siguiendo la [normativa del curso 2014-2015](2014-2015/).
+Plantilla en *LaTeX* para el **Trabajo de Fin de Master** (EPS-UAM). Contiene la estructura básica para la memoria del mismo, siguiendo la [normativa de TFMs](doc/).
 
 - Para completar y adaptar la plantilla, busca en el proyecto la palabra clave `TODO` y sobreescribe el nombre de tu trabajo, tutor, etc.
 - Para manejar la bibliografía se puede utilizar [JabRef](https://github.com/JabRef/jabref), editando [src/bibliografia.bib](src/bibliografia.bib)
@@ -22,6 +22,11 @@ $ sudo yum install texlive-scheme-full
 Instalar con *pacman*
 ```sh
 $ sudo pacman -S texlive-most
+```
+##### Gentoo Linux
+Instalar con *emerge*
+```sh
+$ USE="X cjk context detex dvi2tty epspdf extra graphics humanities jadetex luatex metapost omega pdfannotextractor png pstricks publishers science tex4ht texi2html truetype xetex xindy xml" LINGUAS="en en_GB es" sudo emerge texlive
 ```
 
 ### Windows
@@ -54,7 +59,7 @@ Este proyecto ha sido desarrollado por:
 
 Licencia
 ----
-El código fuente se ha publicado bajo la [licencia MIT](LICENSE). Los [documentos anexos de la convocatoria 2014-2015](2014-2015/) pertenecen a la [Escuela Politécnica Superior](http://www.eps.uam.es) de la [Universidad Autónoma de Madrid](http://www.uam.es). Los logos proporcionados en la carpeta [graphics](graphics/) pertenecen también a sendas instituciones
+El código fuente se ha publicado bajo la [licencia MIT](LICENSE). Los [documentos anexos de la convocatoria 2014-2015](doc/) pertenecen a la [Escuela Politécnica Superior](http://www.eps.uam.es) de la [Universidad Autónoma de Madrid](http://www.uam.es). Los logos proporcionados en la carpeta [graphics](graphics/) pertenecen también a sendas instituciones.
 
 Contribuir
 ----
