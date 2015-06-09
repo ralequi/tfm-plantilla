@@ -12,4 +12,5 @@ do
 
 	./compilar.sh
 
+	echo
 done
