@@ -4,7 +4,12 @@
 %\selectlanguage{english}
 \begin{abstractEn}
 %TODO: Resumen en inglés, 250-500 palabras.
+Study and analyze a high speed network (>=10Gbps) is a challenge in terms of the amount of data to be processed and the data rate itself. As a result, the networking capture tools are usually very complex. Those tools also have to be continuously adapted to new technology and higher data rates. To meet those requirements, each capture tool implements its own formats and way to capture that difficulties its interoperability. In order to solve this problem, it is necessary to develop a capture tool that stores and works with network data in a well-known format. Standard formats, like \textit{PCAP}, allow different applications to work together easly, even in a paralel way. In the same way, common formats frees network analyzing tools from the underlying network.
 
+Typically, expensive dedicated servers are used to capture, store and process network data at high speed rates. However, this is changing due to the proliferation of \textit{cloud computing} and the greatly improved performance virtualization technology. This trend makes difficult to find bare-metal servers or even network equipment in some environments. Therefore, it is becoming more and more important to evaluate the performance and feasibility of capture and process network data on virtual environments. To achieve that, a capture and store tool has been developed.
+The tool can work at 10Gbps thanks to \textit{Intel DPDK} capture technology. A technology, that also can work in both bare-metal and virtual environments.
+In this work, different methods and capture tools are compared. In the same way, different virtualization methods provided by \textit{KVM} are evaluated.
+While running applications in virtual machines have a small overhead compared with the bare-metal version, results show that performance in virtual environment is really close to bare-metal environment. However, those results can only be reached using the correct configuration and the latest advantages of the state-of-the-art hardware devices.
 \end{abstractEn}
 
 % Palabras clave en inglés
@@ -18,11 +23,16 @@ Virtual network functions, packet capture, virtual machines, Intel DPDK, HPCAP
 \selectlanguage{spanish}
 \begin{abstractEs}
 %TODO: Resumen en español, 250-500 palabras.
+Estudiar y analizar el comportamiento de una red a alta velocidad (>=10~Gbps) supone un reto constante a medida que aumenta la velocidad de las redes de comunicaciones debido a la gran cantidad de datos que se generan a diario y al propio hecho de procesar información a tales velocidades.
+Por estos motivos, las herramientas encargadas de la captura de datos son complejas y se encuentran, por lo general, en constante adaptación a las nuevas tecnologías y  velocidades, lo que dificulta considerablemente su integración directa con otras aplicaciones de motorización o análisis de datos.
+Por ello es necesario que estas herramientas sean capaces de capturar y almacenar los datos en un formato estándar en el que otras herramientas puedan trabajar a posteriori o incluso en paralelo, con los datos de red independientemente de la tecnología de captura utilizada.
 
-
+Típicamente, este proceso de captura, almacenamiento y procesamiento de datos a alta velocidad se ha realizado en máquinas dedicadas. No obstante, debido a la proliferación del \textit{cloud computing} y a la gran mejora en rendimiento de la tecnología de virtualización, esto está cambiando, pudiéndose llegar al caso en el que sea raro disponer de una máquina física en la que realizar estos procesos. Por ello, evaluar la viabilidad de realizar estos procesos de tan alto rendimiento dentro de entornos virtuales comienza a cobrar importancia.
+Dentro de este contexto, se ha desarrollado una herramienta de captura y almacenamiento en disco a 10~Gbps mediante la tecnología de captura \textit{Intel DPDK}, con la capacidad de funcionar tanto en entornos físicos como virtuales. Del mismo modo, en este trabajo se presentan y se comparan diferentes métodos y herramientas de captura, así como los diferentes métodos de virtualización de componentes que ofrece \textit{KVM}.
+A pesar de que el uso de máquinas virtuales impone un sobrecoste computacional a cualquier aplicación, los resultados obtenidos muestran que el rendimiento en entornos virtuales se asemeja mucho al rendimiento en entornos sin virtualización, siempre y cuando se utilice la configuración adecuada que exprima las capacidades de los dispositivos actuales.
 \end{abstractEs}
 
 % Palabras clave en español
 \begin{keywordsEs}
-
+Funciones de red virtuales, captura de paquetes, máquinas virtuales, Intel DPDK, HPCAP
 \end{keywordsEs}

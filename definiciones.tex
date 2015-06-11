@@ -171,3 +171,18 @@
     \vspace{5mm}
     \lstset{basicstyle=\ttfamily\footnotesize,#1}}
   {\endminipage}
+  
+
+%Definiciones de funciones EXTRA para los titulos
+\newlength\salto
+\setlength{\salto}{3.5ex plus 1ex minus .2ex}
+
+\newlength\resalto
+\setlength{\resalto}{2.3ex plus.2ex}
+
+\newcommand{\lsection}[1]
+                {\section{#1}
+                \vskip-.9\resalto   %%%% Aquí reculo el posible salto por defecto de \section
+                \hrule
+                \vskip+.9\salto}  %%%% vuelvo ha realizar el salto (puedes poner otra vez el 90%)
+

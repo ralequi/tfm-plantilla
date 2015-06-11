@@ -23,12 +23,23 @@ echo -n $'Limpiando...\r'
 
 echo -n $'Compilacion terminada. '; date
 
+#Latex Warnings
+if grep -q 'Warning' /tmp/pdflatex.log
+then
+        echo ""
+        echo -e "Latex Warnings: \e[93m\e[1m"
+        grep -Pzo '(?s)Warning.*?\n\n' /tmp/pdflatex.log
+
+        #Return to normal color
+        echo -e "\e[39m\e[0m"
+fi
+
 #Latex Errors
-if grep -q '!' /tmp/pdflatex.log
+if grep -qP '^.?.?.?!' /tmp/pdflatex.log
 then
 	echo ""
 	echo -e "Latex Errors: \e[31m\e[1m"
-	grep '!' -n -A1 /tmp/pdflatex.log
+	grep -Pzo '(?s)!.*?l\.\N*\n' /tmp/pdflatex.log
 
 	#Return to normal color
 	echo -e "\e[39m\e[0m"

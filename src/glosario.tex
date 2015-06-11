@@ -1,5 +1,5 @@
 % Acrónimos
-
+%TFG
 \newacronym{gpu}{GPU}{Unidad de Procesamiento Gráfico}
 \newacronym{qos}{QoS}{Quality of Service}
 \newacronym{dpi}{DPI}{Deep Packet Inspection}
@@ -11,8 +11,20 @@
 \newacronym[description={Network Interface Card},longplural={Interfaces de red}]{nic}{NIC}{Interfaz de red}
 \newacronym[description={Núcleo lógico o Logical CORE}]{lcore}{LCORE}{logical core}
 
+%TFM
+\newacronym[description={máquina virtual}]{vm}{VM}{Virtual Machine}
+\newacronym[description={Funciones de red virtuales}]{nfv}{NFV}{Virtual Network Function}
+
 % Glosario
 
 % TODO: Añadir aquí las definiciones del glosario
 % Ejemplo de glosario
-\newglossaryentry{bitstream}{name={bitstream},description={En este contexto se refiere al fichero binario que configura el Hardware de la FPGA}}
+%\newglossaryentry{bitstream}{name={bitstream},description={En este contexto se refiere al fichero binario que configura el Hardware de la FPGA}}
+
+
+%DOBLEGLOSARIOS:
+
+\newglossaryentry{kvmg}{name={KVM},
+    description={La tecnología KVM es una de las más populares en cuanto a virtualización se refiere, junto con su mayor competidor XEN. Esta tecnología se encuentra presente en el Kernel de Linux (en formato de módulo) y ofrece desde este nivel de ejecución la capacidad de virtualizar diferentes máquinas y dispositivos. Gracias a la tecnología actual de los procesadores (VT-X/AMD-V), esta virtualización puede llegar a ser transparente para la máquina virtualizada, además de ofrecer un aislamiento entre las diferentes máquinas virtuales y la propia máquina física}}
+    
+\newglossaryentry{kvm}{type=\acronymtype, name={KVM}, description={Kernel-based Virtual Machine}, first={Máquina virtual basada en el Kernel (KVM)\glsadd{kvmg}}, see=[Glossario:]{kvmg}}
