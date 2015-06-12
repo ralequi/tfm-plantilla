@@ -2,16 +2,55 @@
 
 Internet, es conocida como la red de redes. Cada año, más y más dispositivos se une a esta gran y colosal red. Una red, que desde hace mucho dejó de estar formada por solo ordenadores caseros y servidores, para ser un conjunto muy heterogéneo de dispositivos (como móviles~\cite{bib:introduccion:smartphone}, tablets e incluso neveras o relojes). Este gran aumento en la cantidad de dispositivos que conforman la red, ha sido parejo al aumento de la velocidad de la red, gracias a una gran cantidad de avances tecnológicos. Si bien, ahora es fácil poder disponer de un enlace simétrico a 100 o incluso a 300~Mbps en nuestros hogares, no podemos obviar que estos enlaces deben acabar por ser agregados en algún punto, convirtiéndose así en enlaces de 10, 40 o incluso 100~Gbps.
 
-Aunque los enlaces de 100~Gbps comienzan a proliferan en los grandes \gls{isp}, aun son complicados de encontrar en otras grandes empresas. No obstante, si que es posible encontrar algunos enlaces e incluso subredes enteras a 10~Gbps. Mantener en funcionamiento redes de alta velocidad ($\geq$10~Gbps) requiere de una infraestructura de red con un alto \gls{capex} y un alto \gls{opex}. Dicha infraestructura, debe ser además monitorizada con regularidad para asegurar el correcto funcionamiento.
+Aunque los enlaces de 100~Gbps comienzan a proliferan en los grandes \glspl{isp}, aun son complicados de encontrar en otras grandes empresas. No obstante, si que es posible encontrar algunos enlaces e incluso subredes enteras a 10~Gbps. Mantener en funcionamiento redes de alta velocidad ($\geq$10~Gbps) requiere de una infraestructura de red con un alto \gls{capex} y un alto \gls{opex}. Dicha infraestructura, debe ser además monitorizada con regularidad para asegurar el correcto funcionamiento.
 
 Toda la infraestructura de red así como el equipamiento de monitorización requieren, de forma tradicional, grandes y potentes máquinas dedicadas a realizar las típicas tareas de \textit{enrutado}, \textit{captura} o \textit{análisis de tráfico}, entre otras. No obstante, este tipo de necesidades no es nuevo. La mayoría de los servidores del mundo funcionaban en caros servidores dedicados, hasta la llegada del \gls{cloud}. El \gls{cloud} virtualiza los recursos clásicos de computación permitiendo a una compañía descentralizar de forma sencilla y barata sus servidores a lo largo del mundo, así como amoldarse en capacidad de cómputo a la demanda de sus clientes. Esto, inevitablemente minimiza el \gls{capex} y el \gls{opex} que una empresa debe afrontar para operar.
 
-Internamente los diversos sistemas de \gls{cloud} utilizan \glspl{vm} para ofrecer sus servicios. Estas máquinas virtuales, deben a su vez conectarse entre sí y el resto del mundo dando lugar a redes virtuales. Sin embargo, virtualizar de forma completa una red, no permite que escale en velocidad y tamaño fácilmente, o no al menos, sin un alto coste y consumo de \gls{cpu}. Gracias a los avances en virtualización y a la aparición de la tecnología de \gls{sriov}, es posible virtualizar los diversos elementos de red dando lugar a las \glspl{nfv}.
+Internamente los diversos sistemas de \gls{cloud} utilizan \glspl{vm} para ofrecer sus servicios. Estas máquinas virtuales, deben a su vez conectarse entre sí y al resto de dispositivos dando lugar a la aparición redes virtuales. Sin embargo, la virtualización completa los dispositivos de red, no ofrece una escalabilidad en velocidad y tamaño fácilmente, o no al menos, sin un alto coste y consumo de procesamiento \gls{cpu}.
 
-\section{Objetivos}
+Para evitar la virtualización completa de dispositivos hardware, los fabricantes de microprocesadores desarrollaron la tecnología virtualización: VT-X (Intel) y AMD-V (Amd). Dicha tecnología permite crear un nivel de aislamiento entre la máquina anfitriona y las máquinas virtuales que hospeda. Aunque esta tecnología supuso un gran avance, una gran máquina capaz de ejecutar diversas máquinas virtuales necesitaría tantos recursos (tarjetas de red, tarjetas gráficas, tarjetas raid, etc) como máquinas virtuales ejecutase. Esto, a pesar de suponer un avance y en cierta medida un ahorro, seguía siendo una solución cara pues no siempre una máquina virtual tenía porque exprimir al máximo un dispositivo hardware completo.
 
-TODO: Alcance del trabajo/proyecto
+Para solventar el problema y poder compartir dispositivos hardware entre diferentes máquinas virtuales, se diseñó la tecnología \gls{sriov}~\cite{bib:introduccion:sriov}.
+Los dispositivos PCI compatibles con \gls{sriov} permiten representar un único dispositivo, como un conjunto de elementos PCI denominados \glspl{vf}. Cada \gls{vf} tiene sus propios recursos virtuales (proporcionados por el hardware anfitrion) al igual que su propio espacio de memoria en el sistema, lo que lo convierte a efectos prácticos en un dispositivo PCI independiente. Cada uno de estos recursos virtuales proporcionados por las \glspl{vf}, son además gestionados por el dispositivo PCI físico. De esta forma, cada \gls{vf} puede ser asociada a una máquina individual diferente, siendo el propio dispositivo hardware el encargado de la compartición y balanceado de los recursos.
 
-\section{Estructura del documento}
+Gracias a estos avances, el mundo de las redes de comunicaciones ha podido introducir el concepto de \gls{nfv}. Siendo una \gls{nfv}, una simple \gls{vf} de una tarjeta de red de alta velocidad. Estas \glspl{nfv}, representan adaptadores de red de la misma velocidad que el adaptador físico, actuando este último como si de un switch se tratase con una (o varias) salidas al exterior. El uso de esta tecnología, permite crear fácilmente conexiones de alta velocidad y rendimiento entre máquinas virtuales. No obstante, hasta donde llega mi conocimiento, actualmente no existe ninguna herramienta capaz de realizar una captura entre dos (o más) \glspl{nfv}.
 
-TODO: Descripción de la estructura del documento
+Este tipo de tecnología, es muy novedoso, lo que conlleva una serie de ventajas e inconvenientes. La peor parte radica en la falta de medidas empíricas de rendimiento de estos sistemas de virtualización. Recordemos, que procesos como la monitorización de tráfico a altas velocidades supone un coste computacional elevado. Valorar si una \gls{vm} es capaz de realizar esas tareas y bajo que condiciones, es fundamental para que futuros arquitectos de redes tomen decisiones a la hora de implementar arquitecturas de red virtuales, o también conocidas como \glspl{sdn}.
+
+\newpage
+\lsection{Objetivos}
+
+Los objetivo principal de este trabajo de este doble trabajo fin de máster es realizar una comparativa entre las diferentes tecnologías de captura, así como de los diferentes métodos de virtualización. Para ello:
+
+\begin{itemize}
+\item Se ha construido con la tecnología Intel \gls{dpdk}, una herramienta de captura a 10~Gbps capaz de:
+\begin{itemize}
+\item Capturar en cualquier entorno (virtual o físico) la mayor cantidad posible de paquetes, sin realizar ninguna tarea con ellos. De esta forma, se pretende evaluar la tasa máxima de captura en ambas situaciones.
+\item Almacenar los paquetes capturados en diferentes ficheros PCAP, de forma que cualquier otra herramienta pueda funcionar con ellos.
+\end{itemize}
+\item Se ha utilizado la herramienta anterior, y compararla con herramientas de captura y/o almacenado a disco actuales, dentro de sus respectivos entornos de funcionamiento.
+\item Se han evaluado las diferentes técnologías de virtualización ofrecidas por una \gls{kvm}: \gls{virtio}, \gls{passthough} y \gls{sriov}.
+\end{itemize}
+
+\lsection{Fases de realización}
+
+Para poder realizar las mediciones adecuadas, fue necesario iniciar con el desarrollo de una herramienta de captura ligera con Intel \gls{dpdk}. De esta forma, es posible asegurar que se mide la tasa de recepción en el mejor escenario posible: en el que la \gls{cpu} se encuentra ociosa.
+Una vez completada la herramienta, era posible empezar a probar diferentes combinaciones y elementos, siendo la primera de ellas, la física. Se idearon un conjunto de scripts con los cuales se podía realizar la experimentación explotando los recursos de almacenamiento (mediante herramientas como dd) y los recursos de captura (como la herramienta en \gls{dpdk}).
+
+Tras disponer de las pruebas más básicas, se comenzó el desarrollo de una aplicación de captura a disco realizada de nuevo en el framework de Intel \gls{dpdk}. A pesar de parecer una tarea sencilla, estamos hablando de capturar (copia hasta el host), procesar (obtener el tiempo, etc), formatear el fichero PCAP, y guardar paquetes de 64 byte a 10~Gbps. Esto significa, que todas esas tareas deben realizarse en menos de 67~ns, lo que supone un verdadero reto. Realizar esta aplicación de forma aceptable, llevo bastante tiempo.
+
+Una vez todas las herramientas estuvieron realizadas, se procedió a la comparación con las diversas herramientas de captura existentes (ver capítulo~\ref{sec:estado_del_arte}) en un entorno físico. Conocidos los rendimientos en los casos más habituales, se procedió a instalar y crear diversas máquinas virtuales sobre las que realizar las pruebas. Tal y como se cuenta en la sección~\ref{sec:entorno}, se han probado multitud de configuraciones de los diferentes dispositivos virtuales, lo cual acarreó un tiempo no despreciable. Cabe destacar que la generación de \glspl{nfv}, supone una tarea computacional no despreciable.
+
+Finalmente, se repitieron las mismas pruebas de los entornos físicos en los diferentes y diversos entornos virtuales, para aquellos motores de captura y almacenamiento que soportaban la virtualización.
+
+\lsection{Estructura del documento}
+
+El documento se ha intentado dividir de forma que permita a un lector con pocos conocimientos profundizar en el campo de la virtualización y sea capaz de entender y aprovechar los conceptos descubiertos de una forma fácil.
+
+En el capítulo~\ref{sec:estado_del_arte}, se presentan las diferentes tecnologías de virtualización con un mayor detalle que el aportado en la introducción. De igual modo, se presentan los diferentes métodos de captura y recepción que se han utilizado posteriormente en las pruebas, así como su relevancia dentro del mercado. También se comentan y se remarcan algunos ejemplo de uso de \gls{nfv} en el mundo de las redes de comunicaciones, y que han dado lugar a trabajos de gran relevancia.
+
+En el capítulo~\ref{sec:disenho}, se presenta la arquitectura de las herramientas desarrolladas, mientras que en el capítulo~\ref{sec:desarrollo} se presenta el desarrollo de las pruebas y las comparativas realizadas entre ellas.
+En este capítulo, en la sección~\ref{sec:entorno} se introduce el entorno de desarrollo sobre el que se operarán las pruebas, tanto a nivel hardware~(subsección~\ref{sec:equipamiento}) como a nivel software~(subsección~\ref{sec:sw}).
+En la sección~\ref{sec:fisico} se presenta la definición de las pruebas realizadas, así como los primeros resultados en un entorno físico, mientras que en la sección~\ref{sec:virtual} se presentan los resultados para las pruebas en entornos virtuales, así como los problemas y conclusiones obtenidas en las diferentes pruebas.
+
+Finalmente, en el capítulo~\ref{sec:resultados} se presenta un resumen de los diferentes resultados de las pruebas, junto con una comparativa entre las diversas herramientas, pruebas y resultados, terminado el trabajo en el capítulo~\ref{sec:conclusiones} en donde se mencionan las últimas conclusiones, así como posibles lineas de trabajo futuro.

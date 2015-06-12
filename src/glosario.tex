@@ -13,9 +13,10 @@
 
 %TFM
 \newacronym[description={Virtual Machine},longplural={máquinas virtuales}]{vm}{VM}{máquina virtual}
-\newacronym[description={Virtual Network Function},longplural={Funciones de Red Virtuales}]{nfv}{NFV}{Función de Red Virtual}
-\newacronym[description={Virtual Function},longplural={Funciones Virtuales}]{vf}{VF}{Función Virtual}
-\newacronym[description={Internet Service Provider},longplural={Proveedores de Servicios de Internet}]{isp}{ISP}{Proveedor de Servicios de Internet}
+\newacronym[description={Virtual Network Function},longplural={funciones de red virtuales}]{nfv}{NFV}{función de red virtual}
+\newacronym[description={Virtual Function},longplural={funciones virtuales}]{vf}{VF}{función virtual}
+\newacronym[description={Internet Service Provider},longplural={proveedores de servicios de internet}]{isp}{ISP}{proveedor de servicios de Internet}
+\newacronym[description={Software Defined Network},longplural={redes definidas por software}]{sdn}{SDN}{red definida por software}
 
 % Glosario 
 
@@ -27,12 +28,15 @@
 
 \newglossaryentry{sriov}{name={SR-IOV},description={También conocida como \textit{Single Root I/O Virtualization}, SR-IOV es una tecnología de virtualización que permite a un único dispositivo PCIe, mostrarse como diversas funciones virtuales (VF). Cada una de estas VF, puede conectarse a una máquina virtual, de forma que la compartición del dispositivo sea realizada por el propio hardware. Esto, minimiza el coste computacional de la máquina anfitriona, así como de las diversas máquinas virtuales que utilizan el dispositivo}}
 
+\newglossaryentry{passthough}{name={Passthough},description={Se denomina Passthough, al mecanismo que tienen las máquinas virtuales para apoderarse por completo de un determinado dispositivo, ``desconectandolo'' de la máquina anfitriona. De esta forma, el sistema operativo invitado, es capaz de utilizar los drivers de forma nativa con el dispositivo y en principio con perdida de rendimiento 0}}
+
+\newglossaryentry{virtio}{name={VirtIO},description={La tecnología VirtIO, forma una parte importante de la tecnología de virtualización de KVM. El concepto de VirtIO, abarca desde los drivers de la máquina virtual, hasta los propios dispositivos virtuales generados por KVM. Un dispositivo VirtIO es, en esencia, una paravirtualización del dispositivo original}}
 
 %DOBLEGLOSARIOS:
 
 \newglossaryentry{kvmg}{name={KVM},
     description={La tecnología KVM es una de las más populares en cuanto a virtualización se refiere, junto con su mayor competidor XEN. Esta tecnología se encuentra presente en el Kernel de Linux (en formato de módulo) y ofrece desde este nivel de ejecución la capacidad de virtualizar diferentes máquinas y dispositivos. Gracias a la tecnología actual de los procesadores (VT-X/AMD-V), esta virtualización puede llegar a ser transparente para la máquina virtualizada, además de ofrecer un aislamiento entre las diferentes máquinas virtuales y la propia máquina física}}
-\newglossaryentry{kvm}{type=\acronymtype, name={KVM}, description={Kernel-based Virtual Machine}, first={máquina virtual basada en el Kernel (KVM)\glsadd{kvmg}}, see=[Glossario:]{kvmg}}
+\newglossaryentry{kvm}{type=\acronymtype, name={KVM}, description={Kernel-based Virtual Machine}, first={máquina virtual basada en el Kernel (KVM)\glsadd{kvmg}}, see=[Glossario:]{kvmg}, firstplural={máquinas virtuales basadas en el Kernel (KVMs)\glsadd{kvmg}}}
 
 
 \newglossaryentry{capexg}{name={CAPEX},
