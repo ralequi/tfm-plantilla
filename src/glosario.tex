@@ -12,19 +12,36 @@
 \newacronym[description={Núcleo lógico o Logical CORE}]{lcore}{LCORE}{logical core}
 
 %TFM
-\newacronym[description={máquina virtual}]{vm}{VM}{Virtual Machine}
-\newacronym[description={Funciones de red virtuales}]{nfv}{NFV}{Virtual Network Function}
+\newacronym[description={Virtual Machine},longplural={máquinas virtuales}]{vm}{VM}{máquina virtual}
+\newacronym[description={Virtual Network Function},longplural={Funciones de Red Virtuales}]{nfv}{NFV}{Función de Red Virtual}
+\newacronym[description={Virtual Function},longplural={Funciones Virtuales}]{vf}{VF}{Función Virtual}
+\newacronym[description={Internet Service Provider},longplural={Proveedores de Servicios de Internet}]{isp}{ISP}{Proveedor de Servicios de Internet}
 
-% Glosario
+% Glosario 
 
 % TODO: Añadir aquí las definiciones del glosario
 % Ejemplo de glosario
-%\newglossaryentry{bitstream}{name={bitstream},description={En este contexto se refiere al fichero binario que configura el Hardware de la FPGA}}
+\newglossaryentry{cloud}{name={Cloud Computing},description={Se define la computación en la nube, como un conjunto de servicios que se encuentran en internet. Dichos servicios suelen estar descentralizados y repartidos en localizaciones y elementos físicos a los que usualmente no se tiene acceso}}
+
+\newglossaryentry{cpu}{name={CPU},description={La tan conocida Unidad de procesamiento central, o CPU, se encarga de realizar la mayor parte de las tareas que realiza un ordenador de hoy en día. En las últimas arquitecturas, es también la encargada de coordinar diferentes dispositivos como la memoria o el bus PCIe.}}
+
+\newglossaryentry{sriov}{name={SR-IOV},description={También conocida como \textit{Single Root I/O Virtualization}, SR-IOV es una tecnología de virtualización que permite a un único dispositivo PCIe, mostrarse como diversas funciones virtuales (VF). Cada una de estas VF, puede conectarse a una máquina virtual, de forma que la compartición del dispositivo sea realizada por el propio hardware. Esto, minimiza el coste computacional de la máquina anfitriona, así como de las diversas máquinas virtuales que utilizan el dispositivo}}
 
 
 %DOBLEGLOSARIOS:
 
 \newglossaryentry{kvmg}{name={KVM},
     description={La tecnología KVM es una de las más populares en cuanto a virtualización se refiere, junto con su mayor competidor XEN. Esta tecnología se encuentra presente en el Kernel de Linux (en formato de módulo) y ofrece desde este nivel de ejecución la capacidad de virtualizar diferentes máquinas y dispositivos. Gracias a la tecnología actual de los procesadores (VT-X/AMD-V), esta virtualización puede llegar a ser transparente para la máquina virtualizada, además de ofrecer un aislamiento entre las diferentes máquinas virtuales y la propia máquina física}}
-    
-\newglossaryentry{kvm}{type=\acronymtype, name={KVM}, description={Kernel-based Virtual Machine}, first={Máquina virtual basada en el Kernel (KVM)\glsadd{kvmg}}, see=[Glossario:]{kvmg}}
+\newglossaryentry{kvm}{type=\acronymtype, name={KVM}, description={Kernel-based Virtual Machine}, first={máquina virtual basada en el Kernel (KVM)\glsadd{kvmg}}, see=[Glossario:]{kvmg}}
+
+
+\newglossaryentry{capexg}{name={CAPEX},
+    description={El término inglés CAPEX, se refiere fundamentalmente a los gastos iniciales (o de actualización si es el caso), que son necesarios para poner en marcha un producto, o construir algo}}    
+\newglossaryentry{capex}{type=\acronymtype, name={CAPEX}, description={CAPital EXpenditures}, first={gasto de capital inical (CAPEX)\glsadd{capexg}}, see=[Glossario:]{capexg}}
+
+
+\newglossaryentry{opexg}{name={OPPEX},
+    description={El término inglés OPPEX, se refiere fundamentalmente a los gastos que tiene un producto tras su contratación o compra}}    
+\newglossaryentry{opex}{type=\acronymtype, name={OPPEX}, description={OPerational EXpenditures}, first={gasto de capital para operar (OPPEX)\glsadd{opexg}}, see=[Glossario:]{opexg}}
+
+

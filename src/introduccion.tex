@@ -1,7 +1,12 @@
 \chapter{Introducción}
 
-TODO: Introducción del trabajo/proyecto
+Internet, es conocida como la red de redes. Cada año, más y más dispositivos se une a esta gran y colosal red. Una red, que desde hace mucho dejó de estar formada por solo ordenadores caseros y servidores, para ser un conjunto muy heterogéneo de dispositivos (como móviles~\cite{bib:introduccion:smartphone}, tablets e incluso neveras o relojes). Este gran aumento en la cantidad de dispositivos que conforman la red, ha sido parejo al aumento de la velocidad de la red, gracias a una gran cantidad de avances tecnológicos. Si bien, ahora es fácil poder disponer de un enlace simétrico a 100 o incluso a 300~Mbps en nuestros hogares, no podemos obviar que estos enlaces deben acabar por ser agregados en algún punto, convirtiéndose así en enlaces de 10, 40 o incluso 100~Gbps.
 
+Aunque los enlaces de 100~Gbps comienzan a proliferan en los grandes \gls{isp}, aun son complicados de encontrar en otras grandes empresas. No obstante, si que es posible encontrar algunos enlaces e incluso subredes enteras a 10~Gbps. Mantener en funcionamiento redes de alta velocidad ($\geq$10~Gbps) requiere de una infraestructura de red con un alto \gls{capex} y un alto \gls{opex}. Dicha infraestructura, debe ser además monitorizada con regularidad para asegurar el correcto funcionamiento.
+
+Toda la infraestructura de red así como el equipamiento de monitorización requieren, de forma tradicional, grandes y potentes máquinas dedicadas a realizar las típicas tareas de \textit{enrutado}, \textit{captura} o \textit{análisis de tráfico}, entre otras. No obstante, este tipo de necesidades no es nuevo. La mayoría de los servidores del mundo funcionaban en caros servidores dedicados, hasta la llegada del \gls{cloud}. El \gls{cloud} virtualiza los recursos clásicos de computación permitiendo a una compañía descentralizar de forma sencilla y barata sus servidores a lo largo del mundo, así como amoldarse en capacidad de cómputo a la demanda de sus clientes. Esto, inevitablemente minimiza el \gls{capex} y el \gls{opex} que una empresa debe afrontar para operar.
+
+Internamente los diversos sistemas de \gls{cloud} utilizan \glspl{vm} para ofrecer sus servicios. Estas máquinas virtuales, deben a su vez conectarse entre sí y el resto del mundo dando lugar a redes virtuales. Sin embargo, virtualizar de forma completa una red, no permite que escale en velocidad y tamaño fácilmente, o no al menos, sin un alto coste y consumo de \gls{cpu}. Gracias a los avances en virtualización y a la aparición de la tecnología de \gls{sriov}, es posible virtualizar los diversos elementos de red dando lugar a las \glspl{nfv}.
 
 \section{Objetivos}
 
