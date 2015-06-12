@@ -28,18 +28,18 @@ if grep -q 'Warning' /tmp/pdflatex.log
 then
         echo ""
         echo -e "Latex Warnings: \e[93m\e[1m"
-        grep -Pzo '(?s)Warning.*?\n\n' /tmp/pdflatex.log
+        grep --text -Pzo '(?s)Warning.*?\n\n' /tmp/pdflatex.log
 
         #Return to normal color
         echo -e "\e[39m\e[0m"
 fi
 
 #Latex Errors
-if grep -qP '^.?.?.?!' /tmp/pdflatex.log
+if grep --text -qP '^.?.?.?!' /tmp/pdflatex.log
 then
 	echo ""
 	echo -e "Latex Errors: \e[31m\e[1m"
-	grep -Pzo '(?s)!.*?l\.\N*\n' /tmp/pdflatex.log
+	grep --text -Pzo '(?s)!.*?l\.\N*\n' /tmp/pdflatex.log
 
 	#Return to normal color
 	echo -e "\e[39m\e[0m"
