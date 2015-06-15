@@ -97,9 +97,24 @@ Esto mismo, llevó a \gls{dpdk} a optar por la filosofía de \gls{zerocopy}, la 
 En este trabajo, se ha buscado enfocarse en una fusión entre el mundo de las redes de comunicaciones y la virtualización. Aunque existen un mayor número de sistemas de captura (como NetMap~\cite{rizzo12usenix,rizzo12cacm,rizzoNETWORK14} o PFQ~\cite{bonelli12pam}) que los mencionados anteriormente, pocos son capaces de adaptarse al mundo virtual y soportar \glspl{nfv}. De las herramientas mencionadas anteriormente, solo Intel \gls{dpdk}, y \textit{HPCAPvf} (Ver anexo~\ref{sec:HPCC}) son capaces de trabajar con ellas.
 En el trabajo~\cite{7101227} se exponen y detallan las herramientas de captura comentadas anteriormente. De igual forma, se realiza una comparativa de algunas aplicaciones desarrolladas con dichas herramientas, así como su rendimiento.
 
-Finalmente, cabe destacar a la olvidada compañía Mellanox. Los drivers \gls{vanilla} de sus tarjetas de 40~Gbps, pueden facilitar a una aplicación cualquiera realizar transmisiones a nivel tcp a más de 20~Gbps, sin necesitar de ningún cambio en la lógica de la aplicación. Aunque este tipo de tarjetas suelen ser olvidadas en las comparativas, pueden generar \glspl{nfv} de forma natural y trabajar en entornos virtuales, ofreciendo una serie de ventajas frente al resto de herramientas. Aunque, en este trabajo no se han tenido en cuenta este tipo de tarjetas, se espera realizar un profundo estudio de las mismas en un futuro.
+Finalmente, cabe destacar a la olvidada compañía Mellanox. Los drivers \gls{vanilla} de sus tarjetas de 40~Gbps, pueden facilitar a una aplicación cualquiera realizar transmisiones a nivel tcp a más de 20~Gbps, sin necesitar de ningún cambio en la lógica de la aplicación. Aunque este tipo de tarjetas suelen ser olvidadas en las comparativas, pueden generar \glspl{nfv} de forma natural y trabajar en entornos virtuales, ofreciendo una clara ventaja frente al resto de herramientas. Aunque, en este trabajo no se han tenido en cuenta este tipo de tarjetas, se espera realizar un profundo estudio de las mismas en un futuro.
 
 \lsection{Tecnologías de virtualización}
+Tal y como se describe en~\cite{schlosser2011performance}, existen 3 formas fundamentales de virtualización (Ver fig.~\ref{fig:ea:vm}):
 
+\begin{enumerate}
+\item \textbf{Virtualización Nativa}: Al arrancar el ordenador, se inicia por defecto un \gls{hypervisor}. Este \gls{hypervisor}, a su vez inicia los diferentes sistemas operativos, quedando una fina capa entre el hardware físico y las diferentes \glspl{vm}. Las herramientas más conocidas que utilizan este sistema son: \textit{VMware}~\cite{bib:vmware} y \textit{Xen}~\cite{bib:xen}.
+\item \textbf{Virtualización a nivel de \gls{os}}: Este sistema de virtualización, inicia una versión ligera del sistema operativo que no llega a arrancar un espacio de usuario. Sobre esta capa, se construyen contenedores virtuales (\glspl{hypervisor}es) que iniciarán a su vez las diferentes \glspl{vm}. Las herramienta más conocida que utiliza este sistema es: \textit{OpenVZ}~\cite{bib:openvz}.
+\item \textbf{Virtualización a nivel de usuario}: En este tipo de virtualización, cada \gls{vm} es ejecutada como cualquier otra aplicación a nivel de usuario. Esto conlleva una cierta sobrecarga en la ejecución de las aplicaciones, pero también ofrece un mayor aislamiento. Las herramientas más conocidas que utilizan este sistema son: \textit{Virtual Box}~\cite{bib:virtualbox} y \textit{\gls{kvm}}~\cite{bib:kvm}.
+\end{enumerate}
+
+\begin{figure}[!bth]
+\centering
+\includegraphics[scale=.7]{vms}
+\caption{Métodos fundamentales de virtualización}
+\label{fig:ea:vm}
+\end{figure}
+
+Cada uno de estos sistemas, de virtualización, ofrece una serie de posibilidades y configuraciones muy amplio. Abarcar todos y cada uno de ellos en busca de la mejor configuración supone un trabajo arduo y, en principio, fuera del alcance de este trabajo. Por ello, y dado que la mayoría de la investigación se vuelca en el uso de \textit{\gls{kvm}} como sistema de virtualización, ha sido escogido como \gls{hypervisor}.
 
 %%SDN!?
