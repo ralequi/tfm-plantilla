@@ -44,7 +44,12 @@ En la figura~\ref{fig:flow:pfring} se muestra el flujo de datos que siguen los p
 
 \newpage
 \subsection{PacketShader}
-El motor de \textit{PacketShader}~\cite{dpdk:packetshader} fue diseñado inicialmente para ser un router, con la ayuda de una \gls{gpu}, con capacidad de trabajar a tasas de varias decenas de~Gbps. No obstante, 
+A pesar de que \textit{PacketShader}~\cite{dpdk:packetshader} fue diseñado inicialmente para ser un router, con la ayuda de una \gls{gpu}, el núcleo de este sistema puede ser extrapolado a otras aplicaciones.
+Este motor, cuenta con capacidad de trabajar a tasas de varias decenas de~Gbps, ya que al igual que \textit{PF\_Ring}, explota los beneficios del paralelismo, así como una reducción en el número de copias. No obstante, cabe destacar en que este sistema utiliza el método de \gls{onecopy} en vez de \gls{zerocopy}, lo que puede llegar a degradar el rendimiento del motor de captura. 
+
+Algunas de las optimizaciones de \textit{PacketShader} es el control de \gls{cache}. Toda la memoria se encuentra alineada de forma que las \glspl{cache} de la \gls{cpu} sufran lo menos posible, optimizándose así el rendimiento.
+Como desventaja, cabe indicar que el motor no pide datos nuevos a la tarjeta hasta que el usuario no lo solicita, pudiéndose así perder paquetes si el usuario no hace las llamadas en el tiempo adecuado. A diferencia con \textit{PF\_Ring}, \textit{PacketShader} no provee una API de uso estándar, por lo que un posible desarrollador usuario se vería obligado a reescribir parte de su aplicación de red. 
+En la figura~\ref{fig:flow:ps} se muestra el flujo de datos que siguen los paquetes hasta llegar a una aplicación de usuario.
 
 
 \begin{figure}[!bth]
@@ -56,6 +61,12 @@ El motor de \textit{PacketShader}~\cite{dpdk:packetshader} fue diseñado inicial
 
 \newpage
 \subsection{HPCAP}
+El driver \textit{HPCAP} fue desarrollado en el grupo de investigación HPCN~\cite{moreno2012TFM}. Este driver, es una extensión mejorada del driver oficial de las tarjetas Intel de 10~Gbps, por lo que solo es compatible con este tipo de tarjetas. Al ser una extensión, este motor de captura conserva en gran medida parte de la funcionalidad original del driver, permitiendo a las interfaces funcionar un modo \gls{vanilla} o en modo \textit{HPCAP} indistintamente. Al contrario que los otros motores de captura presentados anteriormente, \textit{HPCAP} tiene la capacidad de capturar la mayor parte del tráfico con una única cola de recepción.
+
+Al igual que \textit{PacketShader}, \textit{HPCAP} se basa en la filosofía de \gls{onecopy}. Aunque a primera vista está claro que la filosofía del \gls{zerocopy} proporciona una copia menos y mejora el rendimiento, esta técnica supone mantener en memoria los paquetes hasta que el último de los procesos haya terminado con él. Dado que la zona de memoria en la que puede escribir la tarjeta es pequeña, si el tiempo total de proceso de un paquete es elevado, la tarjeta se quedará sin espacio donde copiar los nuevos paquetes viéndose obligada a descartar algunos de ellos. En el caso de la filosofía \gls{onecopy}, es posible mantener un buffer intermedio de gran tamaño en donde almacenar temporalmente los paquetes recibidos. De esta forma, es posible a su vez crear pipelines de proceso de paquetes mucho mayores y mantener un cierto aislamiento de las aplicaciones de procesado de red y la captura en sí, elemento del que no dispone la implementación de \textit{PacketShader}.
+Como cierta desventaja, desear utilizar el motor de captura \textit{HPCAP} en modo \textit{HPCAP}, requiere utilizar una API proporcionada por el propio motor obligando a un desarrollador a reescribir su programa de procesado de red.
+En la figura~\ref{fig:flow:hpcap} se muestra el flujo de datos que siguen los paquetes hasta llegar a una aplicación de usuario.
+
 
 \begin{figure}[!bth]
 \centering
@@ -66,6 +77,12 @@ El motor de \textit{PacketShader}~\cite{dpdk:packetshader} fue diseñado inicial
 
 \newpage
 \subsection{Intel DPDK}
+Intel \gls{dpdk}, es una filosofía, así como un motor de captura~\cite{dpdk:whitepaper:whydpdk,dpdk2015}. Se trata de uno de los sistemas de captura mas novedosos, y por ello, cuenta con gran cantidad de las filosofías que se han ido desarrollando previamente. La filosofía de Intel \gls{dpdk}, se basa en explotar la tecnología multicore de los sistemas actuales, de forma que uno o varios hilos, sean los encargados de recibir y transmitir los datos por una determinada \gls{nic}. En paralelo, otros hilos serán los encargados de procesar dicho tráfico (por ejemplo enrutar, o realizar \gls{dpi}), y si es oportuno, enviar de nuevo los paquetes a los hilos que manejan las transmisiones. Todo esto, de una manera relativamente transparente mediante la utilización de anillos (Colas circulares) para conectar los diferentes hilos entre sí. Un ejemplo de este tipo de arquitectura puede verse en la figura~\ref{fig:flow:dpdk}. 
+
+A pesar de ser un motor de captura (y transmisión) desarrollado por Intel, \gls{dpdk} da soporte a multitud de tarjetas de red no fabricadas por la propia compañía. Algunas de las tarjetas soportadas es la ellas, son las tarjetas Ethernet a 40~Gbps Mellanox o las tarjetas \textit{enic} de \textit{Cisco}. Del mismo modo que \gls{dpdk} da soporte a diversas tarjetas, tambien da soporte a elementos virtualizados como a las propias \glspl{nfv} de sus \glspl{nic}, o las tarjetas paravirtualizadas con \gls{virtio}.
+Intel \gls{dpdk} evita utilizar el espacio del Kernel de linux para maniobrar (evitando así copias intermedias). Por este motivo, su diseño se basa en la construcción de pequeños drivers a nivel de usuario (mediante el módulo \textit{UIO} de \textit{Linux}), lo que permite a un desarrollador utilizar la API de \gls{dpdk} sin tener que preocuparse por los problemas de trabajar a nivel de Kernel.
+Esto mismo, llevó a \gls{dpdk} a optar por la filosofía de \gls{zerocopy}, la cual, puede llegar a ser perjudicial si el pipeline de proceso se llegase a alargar demasiado.
+
 
 \begin{figure}[!bth]
 \centering
@@ -75,10 +92,12 @@ El motor de \textit{PacketShader}~\cite{dpdk:packetshader} fue diseñado inicial
 \end{figure}
 
 
-\subsection{Otros}
+\subsection{Otras herramientas y conclusiones}
 
-%articulo Victor
-\cite{7101227}.
+En este trabajo, se ha buscado enfocarse en una fusión entre el mundo de las redes de comunicaciones y la virtualización. Aunque existen un mayor número de sistemas de captura (como NetMap~\cite{rizzo12usenix,rizzo12cacm,rizzoNETWORK14} o PFQ~\cite{bonelli12pam}) que los mencionados anteriormente, pocos son capaces de adaptarse al mundo virtual y soportar \glspl{nfv}. De las herramientas mencionadas anteriormente, solo Intel \gls{dpdk}, y \textit{HPCAPvf} (Ver anexo~\ref{sec:HPCC}) son capaces de trabajar con ellas.
+En el trabajo~\cite{7101227} se exponen y detallan las herramientas de captura comentadas anteriormente. De igual forma, se realiza una comparativa de algunas aplicaciones desarrolladas con dichas herramientas, así como su rendimiento.
+
+Finalmente, cabe destacar a la olvidada compañía Mellanox. Los drivers \gls{vanilla} de sus tarjetas de 40~Gbps, pueden facilitar a una aplicación cualquiera realizar transmisiones a nivel tcp a más de 20~Gbps, sin necesitar de ningún cambio en la lógica de la aplicación. Aunque este tipo de tarjetas suelen ser olvidadas en las comparativas, pueden generar \glspl{nfv} de forma natural y trabajar en entornos virtuales, ofreciendo una serie de ventajas frente al resto de herramientas. Aunque, en este trabajo no se han tenido en cuenta este tipo de tarjetas, se espera realizar un profundo estudio de las mismas en un futuro.
 
 \lsection{Tecnologías de virtualización}
 
