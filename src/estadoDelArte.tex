@@ -27,37 +27,47 @@ No obstante, trabajar con este tipo de harware supone un alto coste de programac
 
  No obstante, para la mayoría de aplicaciones de red, no es necesario recurrir al hardware dedicado. Por ello, se han desarrollado multitud de herramientas que intentan exprimir al máximo el hardware disponible. Aunque cada una de las aplicaciones toma una serie de decisiones diferentes, en su conjunto todas intentan reducir el impacto de la pila de red, así como el número de interrupciones del procesador. A continuación se muestran algunas de las herramientas más populares y potentes en captura y procesado de red, así como su funcionamiento y características.
  
-\subsection{PF\_RING}
-PF\_RING es un motor y un framework de captura para las tarjetas Intel de 1 y 10 Gbps.
+\subsection{PF\_RING DNA}
+\textit{PF\_Ring}~\cite{RizzoDMA,libzeroNTOP} es un motor y un framework de captura para las tarjetas Intel de 1 y 10~Gbps. Este motor, está diseñado para explotar sistemas \gls{multicore}, de forma que el tráfico de una única \gls{nic}, se divida de forma equitativa entre diferentes colas de paquetes. Cada una de estas colas, debe ser gestionada por un único \gls{core}. De esta forma, cada \gls{core}, es el encargado de solicitar las copias de la memoria de la tarjeta hasta la memoria principal, así como de atender a las interrupciones de la tarjeta de red asociadas a la cola que está atendiendo.
+De esta forma, el motor permite paralelizar el proceso de captura adquiriendo un enorme speedup. No obstante, hay que tener en cuenta la arquitectura de la máquina subyacente, pues una tarjeta de red está conectada a un único procesador. Dado que nos encontramos en una arquitectura de \gls{numa}, instanciar más colas que \glspl{core} tiene el procesador, supondrá que el otro procesador se verá obligado a procesar también tráfico. Esto causará que el segundo procesador interrumpirá al primero para poder acceder a la tarjeta, pudiendo perjudicar el rendimiento.
 
-\begin{figure}[!th]
+Otro detalle de la implementación de \textit{PF\_Ring}, se encuentra en las copias de paquetes. Realizar una copia en memoria tiene un coste que se vuelve no despreciable a la hora de hablar de 10~Gbps. Por este motivo, \textit{PF\_Ring} sigue la política de \gls{zerocopy}, de forma que una vez llegan los paquetes a la tarjeta, \textit{PF\_Ring} copia el contenido de los paquetes a la memoria principal y mapea dicha memoria al usuario. De esta forma, queda evitada la copia entre la zona de memoria del usuario y el espacio del módulo del kernel.
+Es importante destacar que \textit{PF\_Ring} proporciona una API en formato estándar de facto: \textit{libPCAP}.
+En la figura~\ref{fig:flow:pfring} se muestra el flujo de datos que siguen los paquetes hasta llegar a una aplicación de usuario.
+
+\begin{figure}[!bth]
 \centering
 \includegraphics[scale=.6]{pfring}
-\caption{Flujo de paquetes en PF\_RING}
+\caption{Flujo de paquetes en PF\_Ring}
 \label{fig:flow:pfring}
 \end{figure}
 
+\newpage
 \subsection{PacketShader}
+El motor de \textit{PacketShader}~\cite{dpdk:packetshader} fue diseñado inicialmente para ser un router, con la ayuda de una \gls{gpu}, con capacidad de trabajar a tasas de varias decenas de~Gbps. No obstante, 
 
-\begin{figure}[!th]
+
+\begin{figure}[!bth]
 \centering
 \includegraphics[scale=.6]{ps}
 \caption{Flujo de paquetes en PacketShader}
 \label{fig:flow:ps}
 \end{figure}
 
+\newpage
 \subsection{HPCAP}
 
-\begin{figure}[!th]
+\begin{figure}[!bth]
 \centering
 \includegraphics[scale=.6]{hpcap}
 \caption{Flujo de paquetes en Hpcap}
 \label{fig:flow:hpcap}
 \end{figure}
 
+\newpage
 \subsection{Intel DPDK}
 
-\begin{figure}[!th]
+\begin{figure}[!bth]
 \centering
 \includegraphics[scale=.6]{dpdk}
 \caption{Flujo de paquetes en una aplicación Intel DPDK}
@@ -67,6 +77,8 @@ PF\_RING es un motor y un framework de captura para las tarjetas Intel de 1 y 10
 
 \subsection{Otros}
 
+%articulo Victor
+\cite{7101227}.
 
 \lsection{Tecnologías de virtualización}
 

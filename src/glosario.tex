@@ -17,6 +17,7 @@
 \newacronym[description={Virtual Function},longplural={funciones virtuales}]{vf}{VF}{función virtual}
 \newacronym[description={Internet Service Provider},longplural={proveedores de servicios de internet}]{isp}{ISP}{proveedor de servicios de Internet}
 \newacronym[description={Software Defined Network},longplural={redes definidas por software}]{sdn}{SDN}{red definida por software}
+\newacronym[description={Gigabit per second},longplural={Gigabits por segundo}]{gbps}{Gbps}{Gigabit por segundo}
 
 % Glosario 
 
@@ -36,20 +37,40 @@
 
 \newglossaryentry{mpasiva}{name={monitorización pasiva},description={La monitorización pasiva consiste en la captura de tráfico en uno o varios puntos de la red. Analizando el tráfico capturado es posible obtener multitud de información, incluidos problemas a niveles de aplicación}}
 
+\newglossaryentry{multicore}{name={multicore},description={Dentro de este contexto, la palabra \textit{multicore} hace referencia a los sitemas con más de una unidad de cómputo, ya sea porque hay más de un procesador completo, o se trate de un procesador con más de un \textit{core}}}
+
+\newglossaryentry{core}{name={core},description={Entendemos como \textit{core}, como la unidad de procesamiento más básica de la que dispone nuestro sistema. Entendemos igualmente, que un \textit{core}, solo puede ejecutar un único hilo o proceso simultáneamente sin que su rendimiento se vea perjudicado}}
+
+
+\newglossaryentry{zerocopy}{name={zero-copy},description={Hablamos de zero-copy, cuando una aplicación no necesita realizar ninguna copia de los datos (Normalmente de la memoria del kernel a la de usuario) para trabajar con ellos}}
+
+\newglossaryentry{onecopy}{name={one-copy},description={Hablamos de one-copy, cuando una aplicación no requiere realizar una única copia de los datos (Normalmente de la memoria del kernel a la de usuario) para trabajar con ellos}}
+
+
 %DOBLEGLOSARIOS:
 
 \newglossaryentry{kvmg}{name={KVM},
     description={La tecnología KVM es una de las más populares en cuanto a virtualización se refiere, junto con su mayor competidor XEN. Esta tecnología se encuentra presente en el Kernel de Linux (en formato de módulo) y ofrece desde este nivel de ejecución la capacidad de virtualizar diferentes máquinas y dispositivos. Gracias a la tecnología actual de los procesadores (VT-X/AMD-V), esta virtualización puede llegar a ser transparente para la máquina virtualizada, además de ofrecer un aislamiento entre las diferentes máquinas virtuales y la propia máquina física}}
-\newglossaryentry{kvm}{type=\acronymtype, name={KVM}, description={Kernel-based Virtual Machine}, first={máquina virtual basada en el Kernel (KVM)\glsadd{kvmg}}, see=[Glossario:]{kvmg}, firstplural={máquinas virtuales basadas en el Kernel (KVMs)\glsadd{kvmg}}}
+\newglossaryentry{kvm}{type=\acronymtype, name={KVM}, description={Kernel-based Virtual Machine}, first={máquina virtual basada en el Kernel (KVM)\glsadd{kvmg}}, see=[Glosario:]{kvmg}, firstplural={máquinas virtuales basadas en el Kernel (KVMs)\glsadd{kvmg}}}
 
 
 \newglossaryentry{capexg}{name={CAPEX},
     description={El término inglés CAPEX, se refiere fundamentalmente a los gastos iniciales (o de actualización si es el caso), que son necesarios para poner en marcha un producto, o construir algo}}    
-\newglossaryentry{capex}{type=\acronymtype, name={CAPEX}, description={CAPital EXpenditures}, first={gasto de capital inical (CAPEX)\glsadd{capexg}}, see=[Glossario:]{capexg}}
+\newglossaryentry{capex}{type=\acronymtype, name={CAPEX}, description={CAPital EXpenditures}, first={gasto de capital inical (CAPEX)\glsadd{capexg}}, see=[Glosario:]{capexg}}
 
 
 \newglossaryentry{opexg}{name={OPPEX},
     description={El término inglés OPPEX, se refiere fundamentalmente a los gastos que tiene un producto tras su contratación o compra}}    
-\newglossaryentry{opex}{type=\acronymtype, name={OPPEX}, description={OPerational EXpenditures}, first={gasto de capital para operar (OPPEX)\glsadd{opexg}}, see=[Glossario:]{opexg}}
+\newglossaryentry{opex}{type=\acronymtype, name={OPPEX}, description={OPerational EXpenditures}, first={gasto de capital para operar (OPPEX)\glsadd{opexg}}, see=[Glosario:]{opexg}}
+
+
+\newglossaryentry{numag}{name={NUMA},
+    description={La arquitectura NUMA se basa en la descentralización de los recursos de un ordenador. De esta forma, cada procesador tiene su propia memoria y sus propios dispositivos. Si un procesador necesita acceder a los recursos de otro, debe pedirselos al procesador propietario de los mismos, el cual deberá interrumpir alguno de sus procesos para atender la petición. Estas peticiones, se realizan utilizando enlaces de altísima velocidad (como QPI), pero igualmente suelen ocasionar una degradación de rendimiento}}    
+\newglossaryentry{numa}{type=\acronymtype, name={NUMA}, description={Non-Uniform Memory Access}, first={Acceso a Memoria No-Uniforme (NUMA)\glsadd{numag}}, see=[Glosario:]{numag}}
+
+
+\newglossaryentry{mtug}{name={MTU},
+    description={  }}    
+\newglossaryentry{mtu}{type=\acronymtype, name={MTU}, description={Maximum Transmission Unit}, first={Unidad Máxima de Transmisión (MTU)\glsadd{mtug}}, see=[Glosario:]{mtug}}
 
 
