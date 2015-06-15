@@ -53,11 +53,13 @@
 %
 % Resumen
 %
+%\addcontentsline{toc}{chapter}{Resumen} % Descomentar para añadir entrada en el índice
 \include{src/resumen}
 
 %
 % Glosario
 %
+\addcontentsline{toc}{chapter}{Glosario}
 \printglossary[title=Glosario,toctitle=Glosario]
 \printglossary[title=Acrónimos,toctitle=Acrónimos,type=\acronymtype]
 
@@ -122,6 +124,7 @@
 % Rerefencias
 \bibliographystyle{IEEEtran}
 \bibliography{src/bibliografia}
+\addcontentsline{toc}{chapter}{Bibliografía}
 
 % No expandir elementos para llenar toda la página
 \raggedbottom

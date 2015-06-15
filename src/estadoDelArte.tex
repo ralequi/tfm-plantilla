@@ -1,3 +1,42 @@
 \chapter{Estado del Arte\label{sec:estado_del_arte}}
 
-TODO: Estado del arte
+Hoy en día, resulta complicado imaginar Internet como una red exclusiva de clientes y servidores. El fenómeno ``Internet of Things''~\cite{Atzori20102787} ha supuesto un cambio radical a hora de percibir que es Internet. Del mismo modo, que resulta difícil imaginarse a alguien sin un smartphone~\cite{bib:introduccion:smartphone} o sin acceso a Internet~\cite{bib:internet:growth}. Este crecimiento ha supuesto un equivalente aumento tanto en la velocidad como en tamaño de las redes internas de las empresas.
+
+Para mantener una red de cierto tamaño en un buen estado, es necesario monitorizarla~\cite{de2013proactive}. Comunmente se habla de 2 tipos de monitorización: Activa y Pasiva. Cada tipo de monitorización ofrece una serie de ventajas e inconventientes. La \gls{mactiva}, permite a un administrador de red conocer el estado y la calidad de una red, pues este tipo de mediciones ofrece métricas como ancho de banda disponible, el jitter de la red (El cual es muy importante a la hora de transmitir contenido multimedia~\cite{dpdk:Leir1306,hernandomeasuring,garcia2014low}) o la latencia de la red entre dos extremos. No obstante, la monitorización activa afecta de mayor o menor forma al estado de una red, lo que puede perjudicar a la medida y por supuesto a los usuarios de la propia red. Estos efectos perjudiciales, pueden verse ampliados si la monitorización no se realiza mediante técnicas adecuadas~\cite{Ramos20111435}.
+
+Por otro lado, la \gls{mpasiva} no sufre de los efectos perjudiciales de la \gls{mactiva}. Aunque este tipo de monitorización no es capaz de medir el jitter entre dos puntos de la red, ni tampoco la latencia a la que se ven sometidas determinadas comunicaciones, si ofrece otras muchas métricas relevantes. Para realizar este tipo de monitorización en una enlace de alta velocidad, es necesario un equipo de elevadas prestaciones para capturar el tráfico~\cite{dpdk:netfpga,dpdk:packetshader,moreno2012TFM,dpdk:victor:ref:1,dpdk:victor:ref:2,dpdk2015}.
+
+Al disponer de todo el tráfico de un enlace, es posible obtener métricas de este, como pueden ser el ancho de banda del propio enlace, o de una determinada aplicación o usuario, la detección de intrusiones o incluso detección de malfuncionamiento de determinadas aplicaciones.
+Aunque las posibilidades de la \gls{mpasiva} son muchas, tratar con toda esta cantidad de tráfico también supone una gran carga computacional. Por ello, existe multitud de investigación acerca de como escoger el tráfico que debe ser posteriormente almacenado o procesado.
+Una de las aproximaciones más conocidas para segmentar el tráfico, es lo que se llama \textit{packet sampling}~\cite{1209210}. Este tipo de algoritmos intentan seleccionar el tráfico más relevante, de forma que sea posible obtener información estadística de ellos y a su vez reducir de manera drástica el número de paquetes por segundo que deben ser procesados. No obstante, utilizar \textit{packet sampling} tiene un cierto impacto en la medida~\cite{Brauckhoff:2006:IPS:1177080.1177101}, además de limitar el número de métricas interesantes que pueden obtenerse a partir de la \gls{mpasiva}.
+
+Otros métodos de selección de tráfico, se basan en la selección por protocolo. Dado que existen miles de protocolos, es posible que de cara a realizar una monitorización solo nos preocupen algunos en concreto. Aunque identificar un protocolo a nivel de red o transporte es una tarea trivial, no lo es a la hora de identificar un protocolo a nivel de aplicación~\cite{dpdk:Leir1306}. Por este motivo, existen 3 formas diferentes de clasificar tráfico: por puerto, mediante clasificación estadística o mediante \gls{dpi}.
+La clásica clasificación por puerto, nos brinda velocidad en la clasificación, pero no es útil al a hora de clasificar protocolos sin puertos conocidos, detectar atacantes o errores de configuración. La clasificación estadística por otro lado, nos brinda un compromiso entre fiabilidad y velocidad, lo que ha propiciado una elevada cantidad de investigación~\cite{dpi:critica:3,dpi:critica:7,dpi:critica:8,dpi:critica:13}. No obstante, la clasificación estadística requiere disponer de una muestra preliminar del tráfico a partir de la cual obtener un modelo que utilizar posteriormente. De igual modo, es complicado confiar en este tipo de métricas si se desea aplicar algún tipo de reacción activa como denegar a un usuario el acceso a un recurso, a pesar de que la métrica acierte en el 99\% de los casos.
+En el caso de \gls{dpi}, es necesario aplicar una gran cantidad de cálculo para obtener el resultado~\cite{dpi:critica:10b}. Por ello, se han desarrollado aplicaciones de \gls{dpi} que recurren a diversos coprocesadores como \glspl{gpu}~\cite{dpi:gnort,dpdk:Leir1306} o \glspl{fpga}~\cite{dpi:tfm:6,dpi:tfm:7,dpi:tfm:8,dpi:tfm:11}.
+La propia detección de protocolos, aporta suficiente información como para la construcción de firewalls~\cite{dpi:juancho:master,dpi:pedro:2}, detección de intrusiones~\cite{dpi:gnort}, corrección de \gls{qos}~\cite{dpdk:Leir1306} entre otras muchas aplicaciones.
+
+En redes de altas velocidades, en muchos casos resulta poco verosímil trabajar a nivel de paquete y frecuentemente resulta poco interesante. Por este motivo, la extracción de la información de flujo con su correspondiente análisis se vuelve fundamental~\cite{fp:pedroth}. Aunque generar la información de cada uno de los flujos supone procesar igualmente cada uno de los paquetes, resulta un proceso computacionalmente más barato que una clasificación \gls{dpi}. Este procesado de flujos tiene una gran cantidad de desarrollo por detrás ya que facilita el análisis posterior de una red. El tratamiento de flujos es un tema extenso, desde los estándar de NetFlow~\cite{claise2004cisco,rt:netflow} e IPFIX~\cite{hofstede14surveys,claise2008specification}, hasta el desarrollo de herramientas para \gls{cpu}~\cite{mckeown2008openflow,kimCOMCOM06,garcia2014low,fp:pedroth} o para diversos coprocesadores~\cite{fp:marco}.
+
+En definitiva, para poder analizar una red de forma pasiva, ya sea a través de la información de los flujos, o de la información referente a los protocolos de un paquete, es necesario un conjunto de herramientas capaz de capturar el tráfico a la tasa de la red que se desee monitorizar.
+
+\lsection{Herramientas de captura}
+
+Las redes de 10~Gbps no son nuevas.
+Con el objetivo en mente de realizar una \gls{mpasiva} de al menos 10~Gbps, es importante
+
+
+%%OLD%%
+Tal y como se mencionó en el capítulo anterior la realización de una sonda clasificadora está sometida a una serie de problemas.
+Tradicionalmente, uno de los problemas fundamentales en redes ha sido obtener el máximo rendimiento de una tarjeta de red.
+Para solucionar este problema había que recurrir a la construcción o modificación de un driver y en algunos casos extremos a un \gls{fpga}~.
+Gracias a la aparición y apertura de Intel~\gls{dpdk}, estos problemas han sido simplificados en gran medida~\cite{dpdk:whitepaper:whydpdk}.
+
+%%NEW%%
+Realizar un proceso de captura a alta velocidad en un ordanador convencional, supone atravesar toda la pila de red de un sistema operativo, lo que de forma inevitable nos supone una degradación del rendimiento y en el caso de redes de $\geq$10~Gbps, un impedimento a la hora de capturar todo el tráfico. Para solventar este problema, se han desarrollado multitud de herramientas y hardware dedicado. Dos claros ejemplos de hardware dedicado son los procesadores de red Tilera~\cite{bib:tilera} y las FPGAs, en especial con su popular proyecto NetFPGA~\cite{dpdk:netfpga}. No obstante, trabajar con este tipo de harware supone un alto coste de programación, pues los sistema tienen una complejidad elevada. Por el otro lado, estos sistemas permiten realizar algunas tareas que en software serían mucho más complejas o incluso inviables. Algunos de los trabajos más interesantes en estas plataformas son: 
+[]\cite{zazo2014tnt10g}
+
+
+\lsection{Tecnologías de virtualización}
+
+
+%%SDN!?
