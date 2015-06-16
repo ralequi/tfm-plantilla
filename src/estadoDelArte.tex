@@ -117,7 +117,7 @@ Tal y como se describe en~\cite{schlosser2011performance}, existen 3 formas fund
 
 Cada uno de estos sistemas, de virtualización, ofrece una serie de posibilidades y configuraciones muy amplio. Abarcar todos y cada uno de ellos en busca de la mejor configuración supone un trabajo arduo y, en principio, fuera del alcance de este trabajo. Por ello, y dado que la mayoría de la investigación se vuelca en el uso de \textit{\gls{kvm}} como sistema de virtualización, ha sido escogido como \gls{hypervisor}.
 
-El \gls{hypervisor} \textit{\gls{kvm}}, ofrece diferentes métodos a la hora de gestionar los dispositivos virtuales de las~\glspl{vm}. Cada uno de estos dispositivos (como la pantalla, ratón, disco duro o tarjeta de red) puede estar conectado a la máquina virtual de diferentes formas y mediante diferentes niveles de virtualización. Principalmente, \textit{\gls{kvm}} ofrece los siguientes modos de virtualización:
+El \gls{hypervisor} \textit{\gls{kvm}}, ofrece diferentes métodos a la hora de gestionar los dispositivos virtuales de las~\glspl{vm}. Cada uno de estos dispositivos (como la pantalla, ratón, disco duro o tarjeta de red) puede estar conectado a la máquina virtual de diferentes formas y mediante diferentes niveles de virtualización. \textit{\gls{kvm}} ofrece los siguientes modos o métodos de virtualización:
 
 \begin{itemize}
 \item \textbf{Virtualización completa}: \textit{\gls{kvm}} puede crear un dispositivo completamente virtual y simularlo como si fuese un dispositivo real. No obstante, esta virtualización tiene sus límites pues solo es capaz de simular un número limitado de dispositivos. Entre los dispositivos simulables se incluyen tarjetas de red de Intel, dispositivos gráficos o discos duros.
