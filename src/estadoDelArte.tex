@@ -117,4 +117,12 @@ Tal y como se describe en~\cite{schlosser2011performance}, existen 3 formas fund
 
 Cada uno de estos sistemas, de virtualización, ofrece una serie de posibilidades y configuraciones muy amplio. Abarcar todos y cada uno de ellos en busca de la mejor configuración supone un trabajo arduo y, en principio, fuera del alcance de este trabajo. Por ello, y dado que la mayoría de la investigación se vuelca en el uso de \textit{\gls{kvm}} como sistema de virtualización, ha sido escogido como \gls{hypervisor}.
 
+El \gls{hypervisor} \textit{\gls{kvm}}, ofrece diferentes métodos a la hora de gestionar los dispositivos virtuales de las~\glspl{vm}. Cada uno de estos dispositivos (como la pantalla, ratón, disco duro o tarjeta de red) puede estar conectado a la máquina virtual de diferentes formas y mediante diferentes niveles de virtualización. Principalmente, \textit{\gls{kvm}} ofrece los siguientes modos de virtualización:
+
+\begin{itemize}
+\item \textbf{Virtualización completa}: \textit{\gls{kvm}} puede crear un dispositivo completamente virtual y simularlo como si fuese un dispositivo real. No obstante, esta virtualización tiene sus límites pues solo es capaz de simular un número limitado de dispositivos. Entre los dispositivos simulables se incluyen tarjetas de red de Intel, dispositivos gráficos o discos duros.
+\item \textbf{Paravirtualización}: \textit{\gls{kvm}} ofrece un importante y potente conjunto de herramientas de paravirtualización conocidos como \gls{virtio}. Este estándar de creación de dispositivos y drivers, ofrece una serie de facilidades para que los desarrolladores puedan construirse sus propios elementos virtuales. Además, los desarrolladores de la tecnología de \gls{virtio} presumen de ofrecer un rendimiento muy similar al de un dispositivo físico~\cite{russell2008virtio}.
+\item \textbf{Passthrough}: El método de passthrough, permite des-asociar completamente un dispositivo del sistema operativo de la máquina anfitriona para asociarlo a una determinada \gls{vm}, cediéndola el control completo sobre dicho dispositivo. Este método, es también usado para transferir \glspl{vf} a las máquinas virtuales, dado que tanto el sistema operativo, como los diferentes módulos PCI, ven a cada \gls{vf} como un dispositivo independiente.
+\end{itemize}
+
 %%SDN!?
