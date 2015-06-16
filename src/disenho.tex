@@ -55,12 +55,29 @@ En caso de lograr posicionar una \gls{vm} en cada nodo físico a monitorizar, la
 
 \lsection{Sistema de captura diseñado}
 
+A raíz de los escenarios descritos previamente, es posible definir los requisitos que requiere nuestra aplicación de captura de red.
+En el peor de los casos, esta aplicación debe ser capaz de capturar y almacenar el tráfico a tasa de linea, es decir: 10~Gbps.
+Del mismo modo, la aplicación debe ser capaz de trabajar tanto en entornos físicos como en entornos virtuales (Ya sea mediante dispositivos \gls{virtio}, como \glspl{nfv}).
+Para lograrlo, dicha herramienta, debe utilizar la API de Intel~\gls{dpdk} para lograr interoperatividad con diferentes tarjetas de red.
+
+%El funcionamiento interno de esta API es muy conocido y ha sido estudiado previamente en trabajos anteriores~\cite{rleira2013TFG,dpdk:Leir1306}.
+
+Para crear una aplicación con Intel~\gls{dpdk}, hay que tener en cuenta su diseño orientado a la construcción de pipelines y explotación de paralelismo. El funcionamiento de comunicación entre diferentes elementos en una aplicación \gls{dpdk} se basa en la utilización de anillos. Cada anillo, está diseñado como una cola circular que almacena punteros a descriptores de paquetes. Cada descriptor de paquete, a su vez almacena el tamaño del paquete y un puntero al contenido del mismo. De esta forma, al mover un paquete entre diferentes hilos, no es necesario copiar el contenido del paquete, optimizándose los accesos y escrituras de memoria.
+
+Con el objetivo inicial en mente, de evaluar \gls{dpdk} en el mejor caso posible (sin procesamiento), se ha desarrollado una aplicación con único hilo. Dicha aplicación captura todos y cada uno de los paquetes y libera los recursos asociados tan pronto es posible. Tras haber recibido un determinado número de paquetes, imprime por pantalla uno valor estimado de ancho de banda, así como cantidad de paquetes recibidos y perdidos (ya sea por errores en los paquetes u otros efectos). Dado que el funcionamiento en detalle de la API es muy conocido~\cite{dpdk2015} y ha sido estudiado previamente en trabajos anteriores~\cite{rleira2013TFG,dpdk:Leir1306}, considero que no es necesario entrar en detalles implementativos de la aplicación. En la figura~\ref{fig:dis:dpdktest} se muestra una representación gráfica del flujo de datos en la aplicación, mientras que en~\cite{dpdkspeedometer} puede descargarse esta aplicación.
+
+\begin{figure}[!th]
+\centering
+\includegraphics[scale=.7]{dpdktest}
+\caption{Arquitectura de un sistema de captura con DPDK}
+\label{fig:dis:dpdktest}
+\end{figure}
+
 
 \begin{figure}[!th]
 \centering
 \includegraphics[scale=.7]{dpdkdd}
-\caption{Arquitectura de un sistema de captura con DPDK}
+\caption{Arquitectura de un sistema de captura y almacenamiento con DPDK}
 \label{fig:dis:dpdkdd}
 \end{figure}
-
 
