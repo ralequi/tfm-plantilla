@@ -1,21 +1,27 @@
 #!/bin/bash
 
 # Compilar
-echo -n $'Compilando... pdflatex (1/3)\r'
+echo -n $'Compilando... pdflatex (1/4)\r'
+pdflatex -interaction=nonstopmode main.tex > /dev/null
+
+echo -n $'Compilando... makeglossaries\r'
+makeglossaries main > /tmp/makeglossaries.log
+
+echo -n $'Compilando... pdflatex (2/4)\r'
 pdflatex -interaction=nonstopmode main.tex > /dev/null
 
 echo -n $'Compilando... bibtex\r'
 bibtex main > /tmp/bibtex.log
 
-echo -n $'Compilando... makeglossaries\r'
-makeglossaries main > /tmp/makeglossaries.log
-
-echo -n $'Compilando... pdflatex (2/3)\r'
+echo -n $'Compilando... pdflatex (3/4)\r'
 pdflatex -interaction=nonstopmode main.tex > /dev/null
 
-echo -n $'Compilando... pdflatex (3/3)\r'
+echo -n $'Compilando... pdflatex (4/4)\r'
 pdflatex -interaction=nonstopmode main.tex > /tmp/pdflatex.log
-mv main.pdf "Trabajo de Fin de Master.pdf"
+
+echo -n $'Comprimiendo... [gs prepress quality]...\r'
+gs -sDEVICE=pdfwrite -dCompatibilityLevel=1.4 -dPDFSETTINGS=/prepress -dNOPAUSE -dQUIET -dBATCH -sOutputFile="Trabajo de Fin de Master.pdf" main.pdf
+#mv main.pdf "Trabajo de Fin de Master.pdf"
 
 # Limpiar archivos auxiliares
 echo -n $'Limpiando...\r'

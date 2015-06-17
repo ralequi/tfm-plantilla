@@ -4,3 +4,5 @@ rm -f *.alg *.acr *.acn *.lof *.log *.lot *.out *.bak *.toc *.xdy *.ist *.gls *.
 cd src/ &&
 rm -f *.alg *.acr *.acn *.lof *.log *.lot *.out *.bak *.toc *.xdy *.ist *.gls *.glo *.blg *.aux *.bbl *.glg *.glsdefs  main.run.xml main-blx.bib &&
 cd ..
+# Borramos la última versión del fichero compilado
+rm main.pdf

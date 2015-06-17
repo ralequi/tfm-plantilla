@@ -23,7 +23,7 @@ Dado que trabajar con una elevada cantidad de dispositivos en la red, causa un i
 \label{fig:dis:arq}
 \end{figure}
 
-No obstante, añadir un nuevo equipo a una red, suele suponer la implantación de un equipo grande (4\gls{U}) y de elevado coste dentro del \gls{cpd} en donde se encuentran los equipos y la red que desean ser monitorizados. También hay que tener en cuenta, que añadir un nuevo equipo supone una serie de riesgos de seguridad para la empresa propietaria de la red y de los equipos y que en ciertos casos, puede no ser asumible.
+No obstante, añadir un nuevo equipo a una red, suele suponer la implantación de un equipo grande (4\gls{u}) y de elevado coste dentro del \gls{cpd} en donde se encuentran los equipos y la red que desean ser monitorizados. También hay que tener en cuenta, que añadir un nuevo equipo supone una serie de riesgos de seguridad para la empresa propietaria de la red y de los equipos y que en ciertos casos, puede no ser asumible.
 
 Dejando estos problemas de lado, es importante tener en cuenta que esta visión de como funciona un~\gls{cpd} y por ende, esta definición de la arquitectura de red es muy diferente a la visión tradicional. Actualmente, y desde la popularización del \gls{cloud}, resulta difícil de imaginar un dispositivo dedicado en exclusiva a una única tarea. De forma habitual, una aplicación (como puede ser un servidor web o una base de datos) no explota completamente los recursos de la máquina en la que se ejecuta. Por este motivo, los \glspl{cpd} actuales(Ver Fig.~\ref{fig:dis:arqvm}) disponen de grandes y potentes máquinas que permiten ejecutar multitud de pequeñas máquinas virtuales dedicadas a tareas muy concretas. Esta división en pequeñas tareas o servicios viene de la mano con el auge de los sistemas distribuidos (como Hadoop~\cite{hadoop,hadoop-definitive-guide}), cuyo objetivo es la resolución de un gran problema a base de fragmentarlo en pequeños trozos y procesarlos en paralelo.
 
@@ -58,13 +58,13 @@ En caso de lograr posicionar una \gls{vm} en cada nodo físico a monitorizar, la
 A raíz de los escenarios descritos previamente, es posible definir los requisitos que requiere nuestra aplicación de captura de red.
 En el peor de los casos, esta aplicación debe ser capaz de capturar y almacenar el tráfico a tasa de linea, es decir: 10~Gbps.
 Del mismo modo, la aplicación debe ser capaz de trabajar tanto en entornos físicos como en entornos virtuales (Ya sea mediante dispositivos \gls{virtio}, como \glspl{nfv}).
-Para lograrlo, dicha herramienta, debe utilizar la API de Intel~\gls{dpdk} para lograr interoperatividad con diferentes tarjetas de red.
+Para lograrlo, dicha herramienta, debe utilizar la API de Intel~\gls{dpdk} que implementa esta compatibilidad con elementos virtuales. \gls{dpdk} también ofrece una cierta interoperatividad con diferentes tarjetas de red, no limitando la aplicación a un único fabricante.
 
 %El funcionamiento interno de esta API es muy conocido y ha sido estudiado previamente en trabajos anteriores~\cite{rleira2013TFG,dpdk:Leir1306}.
 
-Para crear una aplicación con Intel~\gls{dpdk}, hay que tener en cuenta su diseño orientado a la construcción de pipelines y explotación de paralelismo. El funcionamiento de comunicación entre diferentes elementos en una aplicación \gls{dpdk} se basa en la utilización de anillos. Cada anillo, está diseñado como una cola circular que almacena punteros a descriptores de paquetes. Cada descriptor de paquete, a su vez almacena el tamaño del paquete y un puntero al contenido del mismo. De esta forma, al mover un paquete entre diferentes hilos, no es necesario copiar el contenido del paquete, optimizándose los accesos y escrituras de memoria.
+Para crear una aplicación con Intel~\gls{dpdk}, hay que tener en cuenta su filosofía orientada a la construcción de pipelines y explotación de paralelismo. El funcionamiento de comunicación entre diferentes elementos en una aplicación \gls{dpdk} se basa en la utilización de anillos. Cada anillo, está diseñado como una cola circular que almacena punteros a descriptores de paquetes. Cada descriptor de paquete, a su vez almacena el tamaño del paquete y un puntero al contenido del mismo. De esta forma, al mover un paquete entre diferentes hilos, no es necesario copiar el contenido del paquete, optimizándose los accesos y escrituras de memoria.
 
-Con el objetivo inicial en mente, de evaluar \gls{dpdk} en el mejor caso posible (sin procesamiento), se ha desarrollado una aplicación con único hilo. Dicha aplicación captura todos y cada uno de los paquetes y libera los recursos asociados tan pronto es posible. Tras haber recibido un determinado número de paquetes, imprime por pantalla uno valor estimado de ancho de banda, así como cantidad de paquetes recibidos y perdidos (ya sea por errores en los paquetes u otros efectos). Dado que el funcionamiento en detalle de la API es muy conocido~\cite{dpdk2015} y ha sido estudiado previamente en trabajos anteriores~\cite{rleira2013TFG,dpdk:Leir1306}, considero que no es necesario entrar en detalles implementativos de la aplicación. En la figura~\ref{fig:dis:dpdktest} se muestra una representación gráfica del flujo de datos en la aplicación, mientras que en~\cite{dpdkspeedometer} puede descargarse esta aplicación.
+Con el objetivo inicial en mente, de evaluar \gls{dpdk} en el mejor caso posible (sin procesamiento), se ha desarrollado una aplicación con único hilo. Dicha aplicación captura todos y cada uno de los paquetes y libera los recursos asociados tan pronto es posible. Tras haber recibido un determinado número de paquetes, imprime por pantalla uno valor estimado de ancho de banda, así como cantidad de paquetes recibidos y perdidos (ya sea por errores en los paquetes u otros efectos). Dado que el funcionamiento en detalle de la API es muy conocido~\cite{dpdk2015} y ha sido estudiado previamente en trabajos anteriores~\cite{rleira2013TFG,dpdk:Leir1306}, considero que no es necesario entrar en detalles implementativos de la aplicación. En la figura~\ref{fig:dis:dpdktest} se muestra una representación gráfica del flujo de datos en la aplicación, mientras que en~\cite{dpdkspeedometer} puede descargarse la aplicación desarrollada.
 
 \begin{figure}[!th]
 \centering
@@ -73,6 +73,32 @@ Con el objetivo inicial en mente, de evaluar \gls{dpdk} en el mejor caso posible
 \label{fig:dis:dpdktest}
 \end{figure}
 
+Una vez se ha desarrollado una versión preliminar capaz de capturar todos los paquetes a alta velocidad, es posible ampliar la aplicación y almacenar a disco. Aunque parezca una tarea sencilla, existe una serie de restricciones que deben tenerse presentes si se desea escribir a alta velocidad. Dichas restricciones vienen impuestas directamente por la tecnología de almacenamiento utilizada, que en este caso son discos duros.
+
+Fundamentalmente pueden encontrarse 2 tipos de discos duros: Discos duros mecánicos y \glspl{ssd}. Cada tipo, tiene sus propias ventajas e inconvenientes. La unidad básica de escritura y lectura de un disco duro es el \textit{bloque} (típicamente con tamaños del ordern de KiloBytes o pocos MegaBytes). Si una aplicación desea leer o escribir un único byte en un disco duro, independientemente del sistema de ficheros que se esté utilizando, el sistema operativo deberá leer y/o escribir el bloque completo.
+Los discos duros mecánicos se basan utilizan un conjunto de discos magnéticos para almacenar los datos. Dichos discos, deben girar a alta velocidad para ofrecer una velocidad de lectura razonable, así como un conjunto de agujas que se desplacen por el disco leyendo y escribiendo los diferentes bloques. Dichos bloques, se encuentran consecutivos, de forma que leer o escribir una gran cantidad de datos de forma consecutiva, suponga un movimiento muy sutil de las agujas y por tanto un rendimiento muy bueno. Por otro lado, leer o escribir en bloques disjuntos puede obligar a la aguja a moverse llegando a perderse del orden de milisegundos en el proceso.
+
+En cambio, los discos duros \gls{ssd}, en cambio, utilizan memoria flash para almacenar los datos. Esta memoria, no tiene problemas de localidad, por lo que acceder a bloques muy esparcidos no supone una degradación del rendimiento. Esta tecnología, tambien ofrece unas mayores tasas tanto de lectura y escritura (unos 500~MBps, comparados con unos 150~MBps de los discos duros mecánicos). A cambio de estas ventajas, cada bloque de almacenamiento de un \gls{ssd} tiene limitados el número de escrituras posibles. De cara a realizar escrituras de forma periódica y dado el coste que supone un disco \gls{ssd}, parece más sensato utilizar discos duros mecánicos como método de almacenamiento.
+
+No obstante, dado que el objetivo es capturar a 10~Gbps, es necesario utilizar un conjunto de discos. Gracias a las pruebas que se comentan en la sección~\ref{sec:equipamiento}, se ha determinado que gracias a un \gls{raid0} formado por 9 discos, es posible escribir a 10~Gbps. No obstante, alcanzar estas velocidades sigue sin ser una tarea del todo trivial. Al crear un \gls{raid0}, el tamaño de bloque del disco RAID se convierte en el tamaño de bloque de la suma de tamaños de bloque de cada uno de los discos que lo forman. Realizar escrituras más pequeñas que este tamaño, degradaría el rendimiento de escritura, por lo que hay que tenerlo presente.
+
+Los sistemas operativos actuales, realizan una división entre la memoria que pertenece al usuario y la memoria que pertenece al núcleo ( o Kernel ) del sistema operativo. A la hora de realizar multitud de tareas, esta división acarrea problemas de rendimiento y el acceso a disco no es una excepción. Al solicitar una escritura de forma habitual en una aplicación de usuario, la información solicitada es copiada a una región específica del Kernel, y es desde esa memoria desde donde se transferirá al RAID. A la hora de trabajar a altas velocidades, esta copia intermedia impide alcanzar la tasa deseada. No obstante, es posible abrir un fichero en modo ``Direct'', es decir, que los datos sean copiados directamente desde la región de memoria del usuario, hasta el fichero destino. Tunear y refinar esta escritura en disco desde una aplicación propia lleva tiempo y en caso de tratarse de un \gls{raid0}, depende del número y propiedades de los discos que lo conforman.
+Recordemos, que la herramienta debe producir un fichero estándar de los paquetes que ha capturado. El formato estándar para este cometido se denomina PCAP. Un fichero PCAP clásico está compuesto por una pequeña cabecera inicial, y una sucesión de estructuras paquete. Cada una de estas estructuras está formado a su vez por una cabecera en la que figura el tamaño del paquete, el tamaño capturado del paquete, el momento en el que se capturó el paquete y finalmente, el contenido capturado del propio paquete. Debido a que la mayoría de herramientas que procesan ficheros en este formato trabajan adecuadamente con ficheros grandes, la herramienta de captura debe trocear y generar una sucesión de ficheros de tamaño más o menos constante. De forma ideal, este tamaño debe ser de unos 2~GBs como máximo.
+
+\newpage
+Con todas estas ideas en mente, y partiendo del programa inicial presentado en la figura~\ref{fig:dis:dpdktest}, es posible describir la arquitectura final de la herramienta, la cual está formada por 3 hilos:
+
+\begin{itemize}
+\item \textbf{Hilo de captura}: Al igual que en la primera versión, un primer hilo se encarga de recoger los paquetes desde el anillo de recepción de la \gls{nic} de captura, sin realizar ningún cálculo con ellos, los inserta a alta velocidad en un nuevo anillo software.
+
+\item \textbf{Hilo de construcción PCAP}: El segundo hilo es el encargado de realizar la mayor parte del procesamiento de paquetes. El trabajo de este hilo, consiste en la construcción de ficheros PCAP en memoria. Para lograrlo, cuenta con un array de buffers de 1~GB (por defecto de tamaño 4), en donde se almacenará en formato binario el fichero PCAP completo. Dado que el tamaño de un fichero puede ser superior al de un buffer, este hilo debe indicar que buffers representan un nuevo fichero y cuales representan la continuación del buffer predecesor. Por cada buffer de comienzo de fichero, el hilo escribe una cabecera de formato PCAP. A continuación comienza a extraer bloques de paquetes del anillo software mencionado anteriormente. Cada uno de estos paquetes, es marcado temporalmente mediante una \gls{hptl}~\cite{bib:hptl}, de forma que pueda construirse la cabecera del paquete. Tanto la cabecera, como el contenido del paquete son copiados al buffer.
+Cuando el último paquete del último buffer que forma un fichero debe ser escrito, puede dejar algunos bytes libres en los que no quepa dl posible siguiente paquete. En estos casos, el hilo anota en el buffer, que el fichero debe ser truncado tantos bytes como hayan quedado en desuso. Una vez se ha completado el buffer, el hilo lo libera y comienza a trabajar con el siguiente buffer disponible.
+
+\item \textbf{Hilo de volcado a disco}: El tercer hilo, es el encargado de volcar el contenido de los buffers intermedios a disco. Dado que el proceso de escritura es bloqueante, es necesario disponer de un hilo encargado únicamente a este proceso.
+Gracias al funcionamiento de \gls{dpdk}, los buffers en los que escribe el segundo hilo se encuentran contiguos y alineados en memoria, de forma que el Kernel es capaz de escribirlo en el fichero destino a muy bajo coste. Este hilo, a su vez, es el encargado de la creación y truncado de ficheros, mediante las pautas indicadas por el hilo número 2. Tras terminar el volcado de un buffer, el hilo lo libera para que pueda ser reutilizado cuanto antes. 
+\end{itemize}
+
+Gráficamente, es posible ver la arquitectura y el flujo de los paquetes en la figura~\ref{fig:dis:dpdkdd}.
 
 \begin{figure}[!th]
 \centering
@@ -80,4 +106,14 @@ Con el objetivo inicial en mente, de evaluar \gls{dpdk} en el mejor caso posible
 \caption{Arquitectura de un sistema de captura y almacenamiento con DPDK}
 \label{fig:dis:dpdkdd}
 \end{figure}
+
+
+
+
+
+
+
+
+
+
 

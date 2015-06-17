@@ -19,6 +19,7 @@
 \newacronym[description={Software Defined Network},longplural={redes definidas por software}]{sdn}{SDN}{red definida por software}
 \newacronym[description={Gigabit per second},longplural={Gigabits por segundo}]{gbps}{Gbps}{Gigabit por segundo}
 \newacronym[description={Operative System},longplural={Sistemas operativos}]{os}{OS}{Sistema Operativo}
+\newacronym[description={Solid-state drive},longplural={Discos de estado sólido}]{ssd}{SSD}{Disco de estado sólido}
 
 % Glosario 
 
@@ -28,11 +29,11 @@
 
 \newglossaryentry{cpu}{name={CPU},description={La tan conocida Unidad de procesamiento central, o CPU, se encarga de realizar la mayor parte de las tareas que realiza un ordenador de hoy en día. En las últimas arquitecturas, es también la encargada de coordinar diferentes dispositivos como la memoria o el bus PCIe.}}
 
-\newglossaryentry{sriov}{name={SR-IOV},description={También conocida como \textit{Single Root I/O Virtualization}, SR-IOV es una tecnología de virtualización que permite a un único dispositivo PCIe, mostrarse como diversas funciones virtuales (VF). Cada una de estas VF, puede conectarse a una máquina virtual, de forma que la compartición del dispositivo sea realizada por el propio hardware. Esto, minimiza el coste computacional de la máquina anfitriona, así como de las diversas máquinas virtuales que utilizan el dispositivo}}
+\newglossaryentry{sriov}{name={SR-IOV},description={También conocida como \textit{Single Root I/O Virtualization}, SR-IOV~\cite{bib:introduccion:sriov} es una tecnología de virtualización que permite a un único dispositivo PCIe, mostrarse como diversas funciones virtuales (VF). Cada una de estas VF, puede conectarse a una máquina virtual, de forma que la compartición del dispositivo sea realizada por el propio hardware. Esto, minimiza el coste computacional de la máquina anfitriona, así como de las diversas máquinas virtuales que utilizan el dispositivo}}
 
 \newglossaryentry{passthough}{name={Passthough},description={Se denomina Passthough, al mecanismo que tienen las máquinas virtuales para apoderarse por completo de un determinado dispositivo, ``desconectandolo'' de la máquina anfitriona. De esta forma, el sistema operativo invitado, es capaz de utilizar los drivers de forma nativa con el dispositivo y en principio con perdida de rendimiento 0}}
 
-\newglossaryentry{virtio}{name={VirtIO},description={La tecnología VirtIO, forma una parte importante de la tecnología de virtualización de KVM. El concepto de VirtIO, abarca desde los drivers de la máquina virtual, hasta los propios dispositivos virtuales generados por KVM. Un dispositivo VirtIO es, en esencia, una paravirtualización del dispositivo original}}
+\newglossaryentry{virtio}{name={VirtIO},description={La tecnología VirtIO~\cite{russell2008virtio}, forma una parte importante de la tecnología de virtualización de KVM. El concepto de VirtIO, abarca desde los drivers de la máquina virtual, hasta los propios dispositivos virtuales generados por KVM. Un dispositivo VirtIO es, en esencia, una paravirtualización del dispositivo original}}
 
 \newglossaryentry{mactiva}{name={monitorización activa},description={La monitorización activa consiste en la realización de una serie de medidas de una red, en donde dos o más nodos de la misma, intercambian un conjunto de paquetes. A partir de estos paquetes, se obtienen medidas como ancho de banda, jitter, latencia o cantidad de paquetes perdidos}}
 
@@ -53,12 +54,14 @@
 
 \newglossaryentry{u}{name={U},description={Bajo el contexto de los equipos enracables, se denomina una U a la unidad básica de espacio que ocupa un equipo en un rack.}}
 
+\newglossaryentry{raid0}{name={RAID 0},description={Se llama comunmente RAID a un grupo de discos duros que actúan en conjunto mostrándose al sistema operativo como un único disco duro. Un raid 0, es un caso específico en el cual todos los discos que forman el RAID, se encuentran al mismo nivel, es decir, no existe ningún disco que replique datos.}}
+
 \newglossaryentry{hypervisor}{name={hypervisor},description={Se denomina hypervisor a la capa virtual que conecta una máquina virtual con los diferentes dispositivos físicos de la máquina anfitriona. Este elemento, también es el encargado de la paravirtualización y de la virtualización completa de dispositivos}}
 
 %DOBLEGLOSARIOS:
 
 \newglossaryentry{kvmg}{name={KVM},
-    description={La tecnología KVM es una de las más populares en cuanto a virtualización se refiere, junto con su mayor competidor XEN. Esta tecnología se encuentra presente en el Kernel de Linux (en formato de módulo) y ofrece desde este nivel de ejecución la capacidad de virtualizar diferentes máquinas y dispositivos. Gracias a la tecnología actual de los procesadores (VT-X/AMD-V), esta virtualización puede llegar a ser transparente para la máquina virtualizada, además de ofrecer un aislamiento entre las diferentes máquinas virtuales y la propia máquina física}}
+    description={La tecnología KVM~\cite{bib:kvm} es una de las más populares en cuanto a virtualización se refiere, junto con su mayor competidor XEN. Esta tecnología se encuentra presente en el Kernel de Linux (en formato de módulo) y ofrece desde este nivel de ejecución la capacidad de virtualizar diferentes máquinas y dispositivos. Gracias a la tecnología actual de los procesadores (VT-X/AMD-V), esta virtualización puede llegar a ser transparente para la máquina virtualizada, además de ofrecer un aislamiento entre las diferentes máquinas virtuales y la propia máquina física}}
 \newglossaryentry{kvm}{type=\acronymtype, name={KVM}, description={Kernel-based Virtual Machine}, first={máquina virtual basada en el Kernel (KVM)\glsadd{kvmg}}, see=[Glosario:]{kvmg}, firstplural={máquinas virtuales basadas en el Kernel (KVMs)\glsadd{kvmg}}}
 
 
@@ -81,7 +84,14 @@
     description={En el contexto de las redes de comunicaciones, se considera MTU al tamaño máximo que puede tener un paquete en un determinado enlace. Normalmente esta medida viene dada por una restricción del medio físico subyacente, no obstante, si no hubiese una limitación en la longitud de los paquetes, una aplicación podría abusar y emitir un paquete de tamaño infinito que colapsase indefinidamente la red}}    
 \newglossaryentry{mtu}{type=\acronymtype, name={MTU}, description={Maximum Transmission Unit}, first={Unidad Máxima de Transmisión (MTU)\glsadd{mtug}}, see=[Glosario:]{mtug}}
 
+
 \newglossaryentry{cpdg}{name={CPD},
     description={Un centro de datos (o Data Center), suele estar formado por varias habitaciones habilitadas para almacenar entre decenas y centenas de equipos. Estas salas se encuentran climatizadas, de forma que se mantenga una temperatura adecuada para el funcionamiento de los diferentes equipos. Estos centros de datos, suelen ofrecer a sus clientes luz y acceso a Internet a cambio de una cuota por cada U consumida}}    
 \newglossaryentry{cpd}{type=\acronymtype, name={CPD}, description={Centro de procesamiento de datos}, first={Centro de procesamiento de datos (CPD)\glsadd{cpdg}}, see=[Glosario:]{cpdg}}
+
+
+\newglossaryentry{hptlg}{name={HPTL},
+    description={La librería HPTL partió de una primera implementación en mi trabajo fin de grado~\cite{rleira2013TFG}. Debido a la aparición de problemas de mantenibilidad y de configurabilidad, se decidió externalizar su uso como librería y publicarla en github~\cite{bib:hptl}}}    
+\newglossaryentry{hptl}{type=\acronymtype, name={HPTL}, description={High Performance Timing Library}, first={librería de tiempo de alto rendimiento (HPTL)\glsadd{hptlg}}, see=[Glosario:]{hptlg}}
+
 
