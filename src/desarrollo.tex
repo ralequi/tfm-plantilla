@@ -1,12 +1,33 @@
 \chapter{Pruebas\label{sec:desarrollo}}
 
-El objetivo de este capítulo es mostrar tanto las pruebas realizadas como la metodología seguida para obtener los resultados. Una vez se conocen ca
+El objetivo de este capítulo es mostrar tanto las pruebas realizadas como la metodología seguida para obtener los resultados.
+Para poder entrar en detalle, en las pruebas, es necesario hacer un repaso de los dispositivos hardware que han sido usados, así como el software utilizado. Una vez conocidos, es posible definir una metodología de pruebas, así como una descripción de las mismas en los diferentes entornos.
 
 \lsection{Entorno de Desarrollo\label{sec:entorno}}
 
+Escoger un entorno de desarrollo y pruebas adecuado, supone a su vez realizar multitud de comparativas entre diferentes elementos Hardware y Software, así como un conjunto de pruebas empíricas.
+Del mismo modo, resulta complicado poner a prueba todos y cada uno de los posibles elementos, pues si bien puede ser caro acceder a todos ellos, también hay que tener en cuenta que las pruebas tardan en realizarse un tiempo no despreciable, y dado que el tiempo de realización del doble trabajo fin de máster es finito, es imposible abarcar una prueba profunda de todos y cada uno de los posibles elementos.
+Por este motivo, se ha partido del equipamiento que el grupo HPCN ha podido facilitar.
+
 \subsection{Equipamiento utilizado\label{sec:equipamiento}}
 
+El equipo de captura sobre el que se han realizado las pruebas está compuesto por una arquitectura \gls{numa} de doble procesador.
+Ambos procesadores son un \textit{Intel Xeon E5-2630} a una velocidad de 2.6~Ghz. Cada uno de estos procesadores se encuentra conectado a 2 tarjetas de memoria de 8~GB cada una, haciendo un total de 32~GB para todo el sistema.
+Este equipo cuenta con diversos PCIe generación 3 que permiten transferencias de datos de hasta casi un 1~GBps por cada linea PCIe. El equipo cuenta con los siguientes dispositivos PCI:
+
+\begin{itemize}
+\item Tarjeta gráfica Nvidia Tesla K40c.
+\item Tarjeta de red Ethernet Mellanox MT27500 (ConnectX-3) de 40~Gbps~\footnote{A pesar de que Intel~\gls{dpdk} anunciaba poseer los driver para explotar esta tarjeta, no fueron públicamente disponibles hasta la versión 2.0, la cual fue publicada en abril de 2015, fecha muy posterior a la realización de las pruebas.}.
+\item Tarjeta de red Ethernet Intel 82599ES de doble \gls{nic} SFP+ a 10~Gbps cada una.
+\item Tarjeta de red Ethernet Intel I350 de doble \gls{nic} a 1~Gbps cada una. Esta tarjeta de red, proporciona conexión a Internet a la máquina, así como acceso remoto.
+\item Controladora MegaRAID SAS-3 3108.
+\end{itemize}
+
+La controladora raid del equipo se encuentra a su vez conectada a 12 discos duros mecánicos XXX
+
 \subsection{Software utilizado\label{sec:sw}}
+
+\lsection{Metodología de las pruebas\label{sec:metod}}
 
 \lsection{Pruebas en entorno físico\label{sec:fisico}}
 
