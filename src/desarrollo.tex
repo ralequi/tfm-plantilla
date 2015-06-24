@@ -44,33 +44,131 @@ Por este motivo, determinar cual es la cantidad de discos duros necesarios para 
 
 \subsubsection{Equipo de emisión de tráfico}
 
-Existen multitud de herramientas de emisión de tráfico estándar~\footnote{Una de las herramientas clásicas de emisión de tráfico es \href{TCPReplay}{http://tcpreplay.appneta.com/}. Esta herramienta parte de un fichero estándar PCAP y lo transmite por una determinada interfaz de red. También proporciona cierto valor añadido, ya que puede regular la velocidad entre otras cosas.}. No obstante, la gran mayoría de herramientas no son capaces de emitir tráfico a tasas de cercanas a los 10~Gbps, mientras que las que si lo son~\cite{bib:dpdkpktgen}, tienen serias limitaciones frente al tipo de tráfico que pueden emitir.
+Existen multitud de herramientas de emisión de tráfico.
+Una de las herramientas clásicas es \href{http://tcpreplay.appneta.com/}{TCPReplay}.
+Dicha herramienta parte de un fichero estándar \textit{PCAP} y lo transmite por una determinada interfaz de red. TCPReplay, proporciona cierto valor añadido, ya que puede regular la velocidad de transmisión entre otras muchas cosas. No obstante, esta herramienta al igual que la mayoría de emisores de tráfico clásicos (Como pktgen, etc), no es capaz de emitir tráfico a 10~Gbps, aun si este se encuentra en memoria. Esto se debe a que las herramientas de transmisión y generación de tráfico utilizan la pila de red completa del Kernel y los drivers \gls{vanilla} de las tarjetas de red.
+
+De cara a solventar el problema de la generación y transmisión de tráfico, se han construido multitud de herramientas. Los generadores de tráfico software se basan en la reutilización de los drivers optimizados de captura como \gls{dpdk} o \textit{PacketShader}. No obstante, los emisores de tráfico software presentan serias limitaciones.
+%
+En el caso del emisor de \textit{PacketShader}~\cite{dpdk:packetshader}, se presentan ciertas irregularidades en la tasa de tráfico: emisión a ráfagas, problemas en los contenidos de los paquetes y en general problemas de estabilidad. De cara a hacer una comparativa de rendimiento y tasa de captura, estas irregularidades complicarían y harían fluctuar las medidas, por lo que este emisor fue descartado.
+%
+Por otro lado, Intel \gls{dpdk} proporciona una herramienta de emisión de tráfico bastante sofísticada conocida como \textit{Pktgen-\gls{dpdk}}~\cite{bib:dpdkpktgen}, la cual, poco a poco, se está convirtiendo en una conocida aplicación. 
+La herramienta \textit{Pktgen} es capaz de saturar fácilmente 4 enlaces a 10~Gbps mediante tráfico sintético. Para conseguirlo, reserva las estructuras de los paquetes en memoria y las envía a cada una de las \gls{nic}. Esta herramienta, aunque útil para probar casos extremos, se ve perjudicada si lo que se desea es enviar tráfico almacenado previamente en un fichero. Debido al sobrecoste de las estructuras de los paquetes%
+\footnote{Cada estructura de \gls{dpdk} almacena diversa información referente a un paquete. De cara a mantener la coalescencia de las cachés, estas estructuras cuentan con 2048 Bytes (La potencia de 2 más próxima a la \gls{mtu} de la red) para almacenar el payload del paquete.}%
+ que utiliza \gls{dpdk}, no es posible almacenar más que unos pocos centenares de miles de paquetes por GigaByte. Aunque este número pueda aparentar ser muy grande, recordemos que en una red de 10~Gbps, se pueden llegar a mandar hasta casi 15 millones de paquetes por segundo (en caso de paquete mínimo), por lo que esta cantidad de paquetes representaría menos de una décima parte de segundo del tráfico del enlace.
+ 
+En el otro lado, se encuentran los generadores hardware basados en \glspl{fpga}. Dentro del grupo de investigación HPCN ha sido desarrollado un potente y versátil generador de tráfico a 10~Gbps~\cite{zazo2014tnt10g}. Este generador, aporta un nivel de control en la transmisión de las tramas muy preciso, permitiendo simular, tanto cualquier situación de una red real, como casos extremos incluso a nivel físico.
+Para lograr estas características, este sistema utiliza un formato especial de fichero denominado \textit{simple}. Este fichero es similar al formato PCAP, salvo porque almacena la cantidad de ceros que existen a nivel físico entre dos paquetes, lo que permite tener un elevado control y precisión durante la emisión. Dichos ficheros se encuentran en un Raid 0, de forma que un driver intermedio es capaz de acceder de forma eficiente a ellos y copiarlos en \glspl{huge}. Estas páginas son transferidas a la \gls{fpga} a través del bus PCIe. La \gls{fpga} emite el tráfico por una o varias de las diferentes \gls{nic} que posee. Como contrapartida, aunque la \gls{fpga} dispone de hasta 4 interfaces de 10~Gbps, solo es capaz de recibir hasta 10~Gbps por PCIe, por lo que como mucho podrá enviar el mismo tráfico simultáneamente por las diferentes \glspl{nic}. En la figura~\ref{fig:rafaDagda} se muestra un esquema del funcionamiento del generador y emisor de tráfico hardware.
 
 \begin{figure}[!htb]
 \centering
 \includegraphics[scale=.6]{rafaDagda}
 \caption{Arquitectura del emisor de tráfico}
-\label{fig:dis:dpdkdd}
+\label{fig:rafaDagda}
 \end{figure}
+
+Tras escoger el generador de tráfico hardware, se definió un interconexionado de las diferentes máquinas que formarán parte de las diversas pruebas. La máquina encargada de la transmisión de tráfico (llamada \textit{Dagda}) se conecta mediante 2 interfaces de 10~Gbps a la máquina capturadora de tráfico (llamada \textit{Nrg}). La máquina de captura se encuentra a su vez conectada por un enlace de 40~Gbps con una máquina llamda \textit{Onelab3}. No obstante, y como se ha mencionado anteriormente, este enlace queda en desuso debido a la falta de software necesario para explotarlo adecuadamente. En la figura~\ref{fig:conexiones} se muestra gráficamente este interconexionado.
 
 \begin{figure}[!htb]
 \centering
 \includegraphics[scale=.8]{conexiones}
 \caption{Conexionado del equipo de captura y desarrollo}
-\label{fig:dis:dpdkdd}
+\label{fig:conexiones}
 \end{figure}
-
 
 \subsubsection{Tráfico emitido}
 
+Una vez se ha decidido tanto el funcionamiento de la sonda de captura, como el hardware que se utilizará, es necesario definir el tráfico con el que se realizarán las evaluaciones, pruebas y comparativas. Para poder tener medidas útiles, es necesario poner al equipo de captura al límite, forzando y poniendo el sistema en el peor caso posible. No obstante, como se comentó en la introducción, resulta complicado encontrar enlaces completamente saturados, por lo que resulta interesante contar con tráfico representativo real.
+
+Con el objetivo de cubrir ambos escenarios, se han utilizado los siguientes tipos de tráfico:
+
+\begin{enumerate}
+
+\item \textbf{Tráfico extremo}: Dentro del protocolo Ethernet, existen dos casos peores posibles: Un enlace en la que solo hay paquetes de 64 bytes y supone una tasa de 14.88 Millones de paquetes por segundo, o un enlace, en la que solo hay paquetes de tamaño 1500 y unos 800 mil paquetes por segundo.
+En el primer caso, tan solo un 76\% de los bytes transmitidos%
+\footnote{Los paquetes Ethernet tienen diversos campos, como el interframe gap o el preludio, que deben ser transmitidos pero no aportan ninguna información relevante. Por este motivo, dichos campos nunca son transmitidos por la tarjeta hacia el ordenador anfitrión y no pueden ser almacenados. En caso de que los paquetes sean muy pequeños, estos bytes ``ocultos'' se hacen relevantes.} %
+ en el enlace son almacenados, mientras que en el segundo caso se almacenan entorno al 98\% de los bytes. Mientras que el primer caso requiere una mayor necesidad de computo para procesar un gigantesco número de paquetes, el segundo caso requiere de una mayor capacidad de escritura a disco.
+Las herramientas proporcionadas por el generador de tráfico hardware escogido, son capaces de generar ambos escenarios extremos sin la necesidad de construir una traza a medida para la prueba.
+
+\item \textbf{Tráfico Real}: Para poder obtener a tráfico real representativo a alta velocidad, es necesario recurrir a redes de grandes empresas o grandes nodos de interconexión de algún \gls{isp}. Esto causa, que la naturaleza de este tipo de tráfico suela ser confidencial o deba mantener ciertos requisitos de privacidad, por lo que, es complejo acceder a este tipo de muestras de tráfico.
+Dentro de este contexto, la organización \href{http://www.caida.org/home/}{Caida}, captura tráfico en nodos que interconectan grandes ciudades de Estados Unidos. Tras realizar un proceso de anonimización\footnote{El proceso de anonimización consiste en truncar los paquetes eliminando la capa de aplicación.}, la organización Caida publica estas capturas de tráfico para su posterior uso por investigadores. Dentro de las trazas disponibles, se ha escogido una muestra unos 7 minutos de duración entre la ciudad de Seattle y la ciudad de Chicago el día 1 de octubre de 2014~\cite{caida2014}. Aunque esta traza está capturada en un enlace a 10~Gbps, la velocidad efectiva del tráfico ronda los 5~Gbps con un tamaño medio de paquete de unos 965 Bytes. De cara a realizar las pruebas y estresar un poco el sistema, se ha decidido acelerar transmisión de esta traza, reduciendo el tiempo entre los paquetes al mínimo posible.
+
+\end{enumerate}
+
 \subsection{Software utilizado\label{sec:sw}}
 
+Encontrar el software apropiado para realizar un desarrollo es una tarea tediosa. Dado que el objetivo de este trabajo fin de máster es la realización de un motor de captura y almacenamiento de tráfico con Intel~\gls{dpdk} y la realización de una comparativa entre los diferentes métodos de captura en diferentes entornos de ejecución, es necesario plantear un entorno software aceptable para un posible cliente.
+%
+En el mundo empresarial, predomina el uso de las distribuciones de linux basadas en red hat o en suse. No obstante, la tecnología de virtualización, requiere de los últimos avances para poder ser explotada al máximo. Con esto en mente, la distribución de linux que mejor cumple estas condiciones es Fedora. Por este motivo, en la sonde captura se ha instalado un Fedora 20.
+
+La mayoría de los entornos de virtualización de los que disponen las grandes compañías son: \gls{kvm}~\cite{bib:kvm}, XEN~\cite{bib:xen} o la versión profesional de VMWare~\cite{bib:vmware}. De cara a un presupuesto limitado, descartamos la opción de utilizar VMWare desde el principio. La decisión entre los hypervisores \gls{kvm} y XEN es algo más compleja pues son ambos sistemas muy utilizados, ambos son gratuitos y ambos se encuentran en auge. No obstante, se aprecia a la comunidad investigadora más enfocada en el entorno de \gls{kvm}, así como una gran cantidad de esfuerzo por parte de la comunidad de \gls{kvm} en el desarrollo de elementos y técnicas avanzadas de virtualización como \gls{virtio}. Por estos motivos, se ha escogido \gls{kvm} como método de virtualización.
+%
+Como optimización, dado que varios de los motores de captura hacen uso de las \gls{huge}, se ha configurado el sistema de virtualización \gls{kvm} para que reserve la memoria de las máquinas virtuales en \gls{huge} con el objetivo de que el rendimiento en las \glspl{vm} no se vea excesivamente afectado por problemas de paginación o problemas de cache. Las máquinas virtuales, a su vez, proveen \gls{huge} a los diferentes motores que se ejecutan en ellas.
+
+Una vez que tenemos los más pilares básicos de nuestro sistema de captura, es necesario hacer un pequeño énfasis en lo que a funciones virtuales se refiere. Tal y como se ha explicado en capítulos anteriores, las funciones virtuales son a todos los efectos un dispositivo PCIe más. No obstante, las tarjetas Intel ofrecen diversas formas de crear y gestionar sus \glspl{nfv}. Por un lado, el driver \gls{vanilla} \textit{ixgbe}, permite indicar a la tarjeta que cree un número determinado de \glspl{nfv}, de una forma muy sencilla. No obstante, este tipo de funcionamiento delega todo el control de la función virtual a la tarjeta física, sin que la CPU intervenga en ningún caso en el trasiego de paquetes.
+%
+Por otro lado, el driver proporcionado por \gls{dpdk}, proporciona su propia forma de gestionar las funciones virtuales. Este paradigma, rompe ligeramente el concepto de \gls{vf}, ya que \gls{dpdk} requiere del uso de un determinado programa que de forma activa ayuda a la tarjeta a manejar las diferentes funciones virtuales. No obstante, este método obliga a la \gls{cpu} a trabajar, consumiendo, como mínimo, un \gls{core} completo. De cara a evaluar que método es el mejor, se han tenido en cuenta ambas aproximaciones y se detallan los resultados de la comparativa en la sección~\ref{sec:sriov}.
+
+Dentro del software de captura de tráfico se ha decidido realizar una comparativa entre los siguientes motores: \gls{dpdk}, \textit{HPCAP}, \textit{PF\_RING}, y el driver \gls{vanilla} \textit{ixgbe} mediante el programa de captura \textit{TCPDump}~\cite{bib:tcpdump}. El resto de motores de captura han sido descartados para las pruebas, dado que su funcionamiento es muy similar entre sí, y ninguno de ellos es capaz de operar con~\gls{nfv}. Los motores de captura han sido explicados previamente en el capítulo~\ref{sec:estado_del_arte}.
+
 \lsection{Metodología de las pruebas\label{sec:metod}}
+
+Realizar todas y cada una de las pruebas que se describen en las siguientes secciones, supone un trabajo realmente tedioso y en un inicio muy manual. Si bien son importantes los resultados de las pruebas, es de igual importancia mantener un cierto protocolo a la hora de realizarlas asegurando su repetibilidad así como almacenar los resultados de forma organizada. Para llevar esto a cabo, se realizó un documento interno que incluía cada uno de los parámetros de los programas que se utilizaría, así como la forma de almacenar los resultados. A continuación se resumen algunas de las ideas que figuran en dicho documento:
+
+\begin{itemize}
+\item Crear un procedimiento de ejecución de los diferentes programas que conforman la prueba y seguirlo.
+\item Todos los ficheros de resultados son almacenados en un documento de texto, siguiendo un mismo formato único independiente del motor de captura utilizado.
+\item Organizar los ficheros de resultados en un árbol de carpetas, acorde al motor utilizado, el entorno de pruebas (virtual, físico, etc) y nombre del tráfico emitido.
+\end{itemize}
+
+El procedimiento de ejecución de una prueba, varía en función del entorno de la misma:
+
+\begin{itemize}
+\item \textbf{Procedimiento en entorno físico:}
+\begin{enumerate}
+\item Se reinicia la máquina con la configuración de memoria adecuada (En función de si el motor de captura utilizará o no \glspl{huge}.
+\item Se resetea el generador de tráfico.
+\item Se instancia el driver y programa de captura.
+\item Se inicia la transmisión de tráfico por parte del generador (El tipo de tráfico varia en función de la prueba).
+\item Al terminar la ejecución del programa de transmisión, se cierra el programa de captura y se almacenan los resultados.
+\end{enumerate}
+
+\item \textbf{Procedimiento en entorno virtual con \gls{passthough}:}
+\begin{enumerate}
+\item Se reinicia la máquina virtual con la configuración adecuada a la prueba.
+\item Se resetea el generador de tráfico
+\item Se instancia el driver en la máquina virtual y programa de captura.
+\item Se inicia la transmisión de tráfico por parte del generador (El tipo de tráfico varia en función de la prueba).
+\item Al terminar la ejecución del programa de transmisión, se cierra el programa de captura y se almacenan los resultados.
+\end{enumerate}
+
+\item \textbf{Procedimiento en entorno virtual con \gls{nfv}:}
+\begin{enumerate}
+\item Se instancia el driver encargado de la generación de \gls{nfv}.
+\item Se reinicia la máquina virtual con la configuración adecuada a la prueba.
+\item (Si procede) Se inicia el programa \textit{testpmd} de Intel~\gls{dpdk} en el anfitrión para apoyar con la gestión de \glspl{nfv}.
+\item Se resetea el generador de tráfico
+\item Se instancia el driver en la máquina virtual y programa de captura
+\item (Si procede) Se configura el programa \textit{testpmd}
+\item Se inicia la transmisión de tráfico por parte del generador (El tipo de tráfico varia en función de la prueba).
+\item Al terminar la ejecución del programa de transmisión, se cierra el programa de captura y se almacenan los resultados de la máquina virtual y de la máquina anfitriona.
+\end{enumerate}
+
+\end{itemize}
+
 
 \lsection{Pruebas en entorno físico\label{sec:fisico}}
 
 \lsection{Pruebas en entornos virtuales\label{sec:virtual}}
 
+
 \subsection{Usando Passthrough\label{sec:pt}}
 
 \subsection{Usando SR-IOV\label{sec:sriov}}
+
+%contar la diferencia de generación de NFV
+
+\subsubsection{Comparativa de construcción de \glspl{nfv}}
+
+
+\subsubsection{Comparativa de construcción de \glspl{nfv}}
