@@ -128,3 +128,6 @@ sympy-plots-for-*.tex/
 # special files
 src/dise.tex
 *.glsdefs
+
+# Compiled file
+main.pdf

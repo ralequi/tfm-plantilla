@@ -107,64 +107,92 @@ Como optimización, dado que varios de los motores de captura hacen uso de las \
 
 Una vez que tenemos los más pilares básicos de nuestro sistema de captura, es necesario hacer un pequeño énfasis en lo que a funciones virtuales se refiere. Tal y como se ha explicado en capítulos anteriores, las funciones virtuales son a todos los efectos un dispositivo PCIe más. No obstante, las tarjetas Intel ofrecen diversas formas de crear y gestionar sus \glspl{nfv}. Por un lado, el driver \gls{vanilla} \textit{ixgbe}, permite indicar a la tarjeta que cree un número determinado de \glspl{nfv}, de una forma muy sencilla. No obstante, este tipo de funcionamiento delega todo el control de la función virtual a la tarjeta física, sin que la CPU intervenga en ningún caso en el trasiego de paquetes.
 %
-Por otro lado, el driver proporcionado por \gls{dpdk}, proporciona su propia forma de gestionar las funciones virtuales. Este paradigma, rompe ligeramente el concepto de \gls{vf}, ya que \gls{dpdk} requiere del uso de un determinado programa que de forma activa ayuda a la tarjeta a manejar las diferentes funciones virtuales. No obstante, este método obliga a la \gls{cpu} a trabajar, consumiendo, como mínimo, un \gls{core} completo. De cara a evaluar que método es el mejor, se han tenido en cuenta ambas aproximaciones y se detallan los resultados de la comparativa en la sección~\ref{sec:sriov}.
+Por otro lado, el driver proporcionado por \gls{dpdk}, proporciona su propia forma de gestionar las funciones virtuales. Este paradigma, rompe ligeramente el concepto de \gls{vf}, ya que \gls{dpdk} requiere del uso de un determinado programa, llamado \textit{testpmd}, que de forma activa ayuda a la tarjeta a manejar las diferentes funciones virtuales. No obstante, este método obliga a la \gls{cpu} a trabajar, consumiendo, como mínimo, un \gls{core} completo. De cara a evaluar que método es el mejor, se han tenido en cuenta ambas aproximaciones y se detallan los resultados de la comparativa en la sección~\ref{sec:sriov}.
 
 Dentro del software de captura de tráfico se ha decidido realizar una comparativa entre los siguientes motores: \gls{dpdk}, \textit{HPCAP}, \textit{PF\_RING}, y el driver \gls{vanilla} \textit{ixgbe} mediante el programa de captura \textit{TCPDump}~\cite{bib:tcpdump}. El resto de motores de captura han sido descartados para las pruebas, dado que su funcionamiento es muy similar entre sí, y ninguno de ellos es capaz de operar con~\gls{nfv}. Los motores de captura han sido explicados previamente en el capítulo~\ref{sec:estado_del_arte}.
 
 \lsection{Metodología de las pruebas\label{sec:metod}}
 
-Realizar todas y cada una de las pruebas que se describen en las siguientes secciones, supone un trabajo realmente tedioso y en un inicio muy manual. Si bien son importantes los resultados de las pruebas, es de igual importancia mantener un cierto protocolo a la hora de realizarlas asegurando su repetibilidad así como almacenar los resultados de forma organizada. Para llevar esto a cabo, se realizó un documento interno que incluía cada uno de los parámetros de los programas que se utilizaría, así como la forma de almacenar los resultados. A continuación se resumen algunas de las ideas que figuran en dicho documento:
+Realizar todas y cada una de las pruebas que se describen en las siguientes secciones, supone un trabajo tedioso y en un principio muy manual. Si bien son importantes los resultados de las pruebas, es de igual importancia mantener un cierto protocolo a la hora de realizarlas asegurando su repetibilidad así como almacenar los resultados de forma organizada. 
+Para llevar esto a cabo, se realizó un documento interno que incluían los pasos a la hora de lanzar una prueba en los diferentes escenarios, así como los parámetros recomendados para cada una de las diferentes aplicaciones.
 
-\begin{itemize}
-\item Crear un procedimiento de ejecución de los diferentes programas que conforman la prueba y seguirlo.
-\item Todos los ficheros de resultados son almacenados en un documento de texto, siguiendo un mismo formato único independiente del motor de captura utilizado.
-\item Organizar los ficheros de resultados en un árbol de carpetas, acorde al motor utilizado, el entorno de pruebas (virtual, físico, etc) y nombre del tráfico emitido.
-\end{itemize}
+Cada una de las aplicaciones de captura tiene su propia forma de representar las diferentes estadísticas relacionadas con la \gls{nic} que está utilizando para capturar (como paquetes recibidos, paquetes perdidos, paquetes con errores, etc).
+De cara a normalizar estos datos, se realizaron diferentes scripts encargados de interpretar la salida de cada una de las aplicaciones y convertirlas a un formato único. El formato planteado se basa en un simple fichero de texto de 4 columnas separadas por tabulaciones. Cada línea de este fichero, representa un determinado instante de tiempo en el que se consultaron las estadísticas de una única \gls{nic}. En caso de que la aplicación esté gestionando más de una interfaz de red, se generan tantos ficheros como \glspl{nic} utilice.
 
-El procedimiento de ejecución de una prueba, varía en función del entorno de la misma:
+El fichero de estadísticas de una \gls{nic} consta de las siguientes columnas:
 
-\begin{itemize}
-\item \textbf{Procedimiento en entorno físico:}
 \begin{enumerate}
-\item Se reinicia la máquina con la configuración de memoria adecuada (En función de si el motor de captura utilizará o no \glspl{huge}.
-\item Se resetea el generador de tráfico.
-\item Se instancia el driver y programa de captura.
-\item Se inicia la transmisión de tráfico por parte del generador (El tipo de tráfico varia en función de la prueba).
-\item Al terminar la ejecución del programa de transmisión, se cierra el programa de captura y se almacenan los resultados.
+\item Momento en formato unix en el que se realizó la medida.
+\item Velocidad en Gigabits por segundo entre el momento anterior y el actual.
+\item Paquetes recibidos entre el momento anterior y el actual.
+\item Paquetes perdidos entre el momento anterior y el actual.
 \end{enumerate}
 
-\item \textbf{Procedimiento en entorno virtual con \gls{passthough}:}
+Para poder mantener una organización entre las diferentes pruebas, estos ficheros son almacenados en un árbol de carpetas. Este árbol se subdivide en nombre de la prueba, tráfico utilizado, motor de captura utilizado y marca temporal del inicio de la prueba.
+Dado que estos ficheros representan una serie temporal, que aporta cierta información de depuración, se ha realizado un nuevo script que resume los diferentes ficheros asociados a cada prueba, generándose así un pequeño informe de resultados de cada una de las pruebas realizadas.
+
+La complejidad de los capturadores de tráfico es elevada. Por ello, estas aplicaciones cuentan con multitud de parámetros que los permiten acomodarse a diversos entornos. Estos parámetros engloban desde el \gls{core} en el que se ejecuta un determinado componente del capturador, hasta el tamaño de los descriptores de paquete o la longitud de las colas de recepción.
+%
+Para que la comparativa entre los diferentes motores de captura sea justa, es necesario repetir multitud de veces determinadas pruebas en busca de los parámetros adecuados. Del mismo modo, es necesario que todas las pruebas se ejecuten en las mismas condiciones, evitando fluctuaciones debido a otros efectos colaterales de haber ejecutado anteriormente una prueba con otro capturador (como elementos cacheados o cambios colaterales en el funcionamiento de algún dispositivo). Por este motivo, se desarrollaron dos protocolos de realización de pruebas, una para entornos físicos y virtuales mediante \gls{passthough} y otro para entornos virtuales con \glspl{nfv}:
+
+\begin{itemize}
+\item \textbf{Procedimiento en entorno físico y virtual con \gls{passthough}:}
 \begin{enumerate}
-\item Se reinicia la máquina virtual con la configuración adecuada a la prueba.
-\item Se resetea el generador de tráfico
-\item Se instancia el driver en la máquina virtual y programa de captura.
-\item Se inicia la transmisión de tráfico por parte del generador (El tipo de tráfico varia en función de la prueba).
+\item Se reinicia la máquina (física o virtual) con la configuración adecuada (\glspl{huge} si son necesarias, etc).
+\item Se resetea el generador de tráfico.
+\item Se instancia el driver y programa de captura.
+\item Se inicia la transmisión de tráfico por parte del generador.
 \item Al terminar la ejecución del programa de transmisión, se cierra el programa de captura y se almacenan los resultados.
 \end{enumerate}
 
 \item \textbf{Procedimiento en entorno virtual con \gls{nfv}:}
 \begin{enumerate}
-\item Se instancia el driver encargado de la generación de \gls{nfv}.
+\item Se instancia el driver encargado de la generación de \gls{nfv} y se configura.
 \item Se reinicia la máquina virtual con la configuración adecuada a la prueba.
-\item (Si procede) Se inicia el programa \textit{testpmd} de Intel~\gls{dpdk} en el anfitrión para apoyar con la gestión de \glspl{nfv}.
-\item Se resetea el generador de tráfico
-\item Se instancia el driver en la máquina virtual y programa de captura
-\item (Si procede) Se configura el programa \textit{testpmd}
-\item Se inicia la transmisión de tráfico por parte del generador (El tipo de tráfico varia en función de la prueba).
-\item Al terminar la ejecución del programa de transmisión, se cierra el programa de captura y se almacenan los resultados de la máquina virtual y de la máquina anfitriona.
+\item (Si procede) se inicia el programa \textit{testpmd} de Intel~\gls{dpdk} en el anfitrión.
+\item Se resetea el generador de tráfico.
+\item Se instancia el driver en la máquina virtual y programa de captura.
+\item (Si procede) se configura el programa \textit{testpmd}.
+\item Se inicia la transmisión de tráfico por parte del generador.
+\item Al terminar la ejecución del programa de transmisión, se cierra el programa de captura y se almacenan las estadísticas tanto de la máquina virtual como de la máquina física.
 \end{enumerate}
 
 \end{itemize}
 
-
 \lsection{Pruebas en entorno físico\label{sec:fisico}}
 
+
+
+\begin{figure}[!htb]
+\centering
+\includegraphics[scale=.6]{VMfisica}
+\caption{Arquitectura de captura clásica}
+\label{fig:vmfisica}
+\end{figure}
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \lsection{Pruebas en entornos virtuales\label{sec:virtual}}
 
 
 \subsection{Usando Passthrough\label{sec:pt}}
 
+\begin{figure}[!htb]
+\centering
+\includegraphics[scale=.6]{VMPass}
+\caption{Arquitectura de captura en un escenario con Passthrough} 
+\label{fig:vmpass}
+\end{figure}
+
 \subsection{Usando SR-IOV\label{sec:sriov}}
+
+\begin{figure}[!htb]
+\centering
+\includegraphics[scale=.6]{VMsriov}
+\caption{Arquitectura de captura en un escenario con SR-IOV y NFVs}
+\label{fig:vmsriov} 
+\end{figure}
 
 %contar la diferencia de generación de NFV
 

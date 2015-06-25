@@ -20,7 +20,7 @@ echo -n $'Compilando... pdflatex (4/4)\r'
 pdflatex -interaction=nonstopmode main.tex > /tmp/pdflatex.log
 
 echo -n $'Comprimiendo... [gs prepress quality]...\r'
-gs -sDEVICE=pdfwrite -dCompatibilityLevel=1.4 -dPDFSETTINGS=/prepress -dNOPAUSE -dQUIET -dBATCH -sOutputFile="Trabajo de Fin de Master.pdf" main.pdf
+gs -sDEVICE=pdfwrite -dPDFSETTINGS=/prepress -dNOPAUSE -dQUIET -dBATCH -sOutputFile="Trabajo de Fin de Master.pdf" main.pdf
 #mv main.pdf "Trabajo de Fin de Master.pdf"
 
 # Limpiar archivos auxiliares
