@@ -109,7 +109,8 @@ Una vez que tenemos los más pilares básicos de nuestro sistema de captura, es 
 %
 Por otro lado, el driver proporcionado por \gls{dpdk}, proporciona su propia forma de gestionar las funciones virtuales. Este paradigma, rompe ligeramente el concepto de \gls{vf}, ya que \gls{dpdk} requiere del uso de un determinado programa, llamado \textit{testpmd}, que de forma activa ayuda a la tarjeta a manejar las diferentes funciones virtuales. No obstante, este método obliga a la \gls{cpu} a trabajar, consumiendo, como mínimo, un \gls{core} completo. De cara a evaluar que método es el mejor, se han tenido en cuenta ambas aproximaciones y se detallan los resultados de la comparativa en la sección~\ref{sec:sriov}.
 
-Dentro del software de captura de tráfico se ha decidido realizar una comparativa entre los siguientes motores: \gls{dpdk}, \textit{HPCAP}, \textit{PF\_RING}, y el driver \gls{vanilla} \textit{ixgbe} mediante el programa de captura \textit{TCPDump}~\cite{bib:tcpdump}. El resto de motores de captura han sido descartados para las pruebas, dado que su funcionamiento es muy similar entre sí, y ninguno de ellos es capaz de operar con~\gls{nfv}. Los motores de captura han sido explicados previamente en el capítulo~\ref{sec:estado_del_arte}.
+Dentro del software de captura de tráfico se ha decidido realizar una comparativa entre los siguientes motores: \gls{dpdk}, \textit{HPCAP}, \textit{PF\_RING}, y el driver \gls{vanilla} \textit{ixgbe} mediante el programa de captura simple basado en \textit{libPCAP}~\cite{bib:tcpdump}.%\textit{TCPDump}~\cite{bib:tcpdump}. 
+El resto de motores de captura han sido descartados para las pruebas, dado que su funcionamiento es muy similar entre sí, y ninguno de ellos es capaz de operar con~\gls{nfv}. Los motores de captura han sido explicados previamente en el capítulo~\ref{sec:estado_del_arte}.
 
 \lsection{Metodología de las pruebas\label{sec:metod}}
 
@@ -161,7 +162,12 @@ Para que la comparativa entre los diferentes motores de captura sea justa, es ne
 
 \lsection{Pruebas en entorno físico\label{sec:fisico}}
 
+El régimen clásico de funcionamiento de las múltiples herramientas de red es el entorno nativo o físico. Dado que estas herramientas usualmente requieren de una gran cantidad de procesamiento así como de ancho de banda en la memoria para funcionar a altas (e incluso no tan altas) velocidades, hasta hace poco era impensable llevar a estas herramientas a un entorno virtual, salvo para realizar tareas con muy poca cantidad de datos.
+Por este motivo, el entorno físico es el punto de partida en la realización de cualquier comparativa de herramientas de red, lo que incluye a los capturadores de red.
 
+La arquitectura del entorno físico es simple. Una tarjeta de red y una controladora Raid, mediante sus correspondientes drivers, se conectan a un motor de captura. De esta forma, el trabajo del motor de captura se resume en una copia de los datos que llegan desde la red hasta el Raid de alta velocidad. En un principio, esta tarjeta de red, se encontraría conectada a un switch o a un router de la red que deseamos monitorizar, el cual, nos duplica todo el tráfico que circula por la misma mediante un puerto de SPAN. Dado que en este caso, no se ha podido acceder a una red de alta velocidad, se ha simulado este enlace mediante el generador hardware comentado previamente.
+
+Si el servidor de captura es suficientemente potente, es posible que en paralelo se encuentren en ejecución otras aplicaciones en nuestra sonda de captura. Estas aplicaciones pueden encargarse de leer los datos almacenados en el Raid y sacar algún tipo de análisis, o incluso, ejecutar algún tipo de servicio que no esté directamente relacionado con la captura como un servidor web o una máquina virtual completa. Esta arquitectura puede verse en la figura~\ref{fig:vmfisica}.
 
 \begin{figure}[!htb]
 \centering
@@ -170,13 +176,85 @@ Para que la comparativa entre los diferentes motores de captura sea justa, es ne
 \label{fig:vmfisica}
 \end{figure}
 
+Un sistema de captura y almacenado, como su nombre indica, se divide en dos partes: captura y almacenado. Ambos sistemas utilizan y explotan al máximo el ancho de banda de la memoria y el ancho de banda de los diferentes buses de comunicaciones. Por ello, es necesario realizar una comparativa que mida el caso mejor de ambos procesos por separado.
 
+De cara a hacer una prueba de rendimiento del sistema de almacenado (Raid 0), se ha reutilizado un script que permite, dinámicamente, cambiar el número de discos que conforman el Raid de captura. Ya que los motores de captura de los que se dispone, almacenan sucesivos ficheros de 2~GB, este script se encarga también de realizar sucesivas escrituras de ficheros de 2~GB mediante la herramienta de \textit{GNU}, \textit{dd}. Tal y como se ha comentado anteriormente, para poder escribir a esta velocidad en un raid es necesario saltarse las copias intermedias que realiza de forma natural el kernel de \textit{Linux}. Para lograrlo, existe el modo de escritura \textit{Direct}, que permite al kernel copiar directamente desde la memoria del usuario a nuestro raid de captura.
+
+
+\begin{figure}[!htb]
+\centering
+\includegraphics[scale=.7]{graph1}
+\caption{Rendimiento de escritura en Raid 0 sin virtualización}
+\label{fig:vmfisica:graphdd}
+\end{figure}
+
+Tal y como puede observarse en la figura~\ref{fig:vmfisica:graphdd}, la tasa de escritura a disco parece crecer de forma lineal con el número de discos que conforman el raid. A raíz de estos resultados, parece viable crear un raid de tan solo 9 discos para las pruebas, pues en media ofrece una tasa de escritura de más de los 10~Gbps a los que se recibe el tráfico. No obstante, y para mayor seguridad, se han realizado varios cientos de prueba de escritura para poder obtener un intervalo de confianza del rendimiento que proporciona el Raid con 9 discos. Dicho intervalo se encuentra entre 11,09 y 11,23~Gbps, lo que nos asegura en cierta medida que el rendimiento será suficiente para almacenar todo el tráfico.
+
+Una vez se ha medido el rendimiento del raid de almacenamiento el caso óptimo, es posible comenzar a realizar las primeras pruebas de captura con los diferentes motores.
+Dado que en esta primera prueba, se busca encontrar las limitaciones de los capturadores de tráfico, se han utilizado unas pequeñas aplicaciones que tan solo reciben el tráfico y no realizan ningún procesado sobre los mismos. Mientras que los motores \textit{HPCAP} y \textit{PF\_RING} proporcionan sus propias herramientas básicas de testeo, se ha realizado una herramienta propia en \gls{dpdk} para realizar este tipo de mediciones. De igual modo, se ha reutilizado una pequeña aplicación realizada en \textit{libpcap} para probar la tasa de captura del driver \gls{vanilla} \textit{ixgbe}.
+
+Los resultados de esta primera prueba, pueden observarse en la tabla~\ref{tab:vmfisica:soloCap}. Estos resultados, resultan en cierta medida sorprendentes pues el driver \gls{vanilla} de Intel ha mejorado en gran medida con los años, pudiendo incluso capturar 10~Gbps sin perdidas cuando se enfrenta a un tráfico realista.
+También cabe destacar, el rendimiento del motor de captura \textit{PF\_RING}. A pesar de obtener un buen rendimiento al enfrentarse a una única \gls{nic}, el rendimiento decrece y comienza perder paquetes cuando debe enfrentarse a 2 interfaces de red simultáneamente.
+El rendimiento de \textit{HPCAP}, parece bastante razonable si recordamos su filosfía de \gls{onecopy}. Finalmente, en esta tabla se puede observar como la tecnología de captura más novedosa sale ganando en esta prueba sin llegar a perder ni un solo paquete en ninguna de los casos.
+
+\begin{table}[htb]
+\centering
+\begin{tabular}{|c|c|c|c|c|}
+	\hline
+		\multirow{3}{*}{\begin{tabular}[c]{c}{\bf Motor}\\ {\bf de captura}\end{tabular}} & \multicolumn{4}{c|}{{\bf \% de paquetes procesados}}\\
+	\cline{2-5}
+		 & \multicolumn{2}{c|}{{\bf 1 \gls{nic}}} & \multicolumn{2}{c|}{{\bf 2 \glspl{nic}}} \\
+	\cline{2-5}
+		 & {\bf 64 Bytes }   & {\bf CAIDA}  & {\bf 64 Bytes}   & {\bf CAIDA}  \\ \hline
+		ixgbe         & 2.7   & 100  & 3.7     & 93.55  \\ \hline
+		PF\_RING      & 100   & 100  & 76.1    & 100    \\ \hline
+		HPCAP         & 97.9  & 100 & 97.8  & 100     \\ \hline
+		DPDK          & 100   & 100  & 100     & 100  \\ \hline
+\end{tabular}
+\caption{Porcentaje de paquetes capturados en un escenario sin virtualización ni almacenamiento de paquetes.}
+\label{tab:vmfisica:soloCap}
+\end{table}
+
+Una vez se han obtenido los resultados de las primeras pruebas, es posible comenzar a realizar las pruebas conjuntas de captura y almacenamiento a disco. Cabe recordar, que en estas pruebas pueden empezar a surgir cuellos de botella en los accesos a memoria, así como en los accesos a los buses PCIe. Tal y como se muestra en la tabla~\ref{tab:vmfisica:CapAlmac}, el rendimiento con respecto a la tabla~\ref{tab:vmfisica:soloCap} decrece en cierta medida. Un detalle a tener en cuenta es el descenso en el rendimiento de la aplicación desarrollada en \gls{dpdk}. Al igual que el \gls{zerocopy} ayuda a mejorar el rendimiento, si el pipeline de proceso tiene demasiada latencia, se comienza a perder paquetes. Por otro lado, en una filosofía \gls{onecopy}, como la de \textit{HPCAP}, se independiza mucho mejor el procesamiento sobre los paquetes (en este caso copia a disco) del proceso de captura.
+Por este motivo, la tasa de paquetes capturados utilizando \textit{HPCAP} se ve muy poco afectada cuando se añade el proceso de almacenado. Mientras que en la implementación de captura sobre \gls{dpdk}, se pierde más de un 4\% de los paquetes, frente a la implementación de solo captura que no perdía ningún paquete.
+Finalmente, cabe mencionar que las pruebas sobre captura y almacenamiento se han realizado utilizando una única \gls{nic}. Dado que las pruebas del raid indican que solo es capaz de almacenar hasta 10~Gbps, carece de sentido realizar una prueba que claramente va a estar acotada por esta cifra.
+
+\begin{table}[htb]
+\centering
+\begin{tabular}{|c|c|c|}
+	\hline
+		\multirow{2}{*}{\begin{tabular}[c]{c}{\bf Motor}\\ {\bf de captura}\end{tabular}} & \multicolumn{2}{c|}{{\bf \% de paquetes procesados}}\\
+	\cline{2-3}
+		 & {\bf 64 Bytes }   & {\bf CAIDA}    \\ \hline
+		ixgbe         & 10,3  & 91.9     \\ \hline
+		HPCAP         & 95.7  & 100     \\ \hline
+		DPDK          & 95.8  & 100    \\ \hline
+\end{tabular}
+\caption{Porcentaje de paquetes capturados con almacenamiento y sin virtualización.}
+\label{tab:vmfisica:CapAlmac}
+\end{table}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \lsection{Pruebas en entornos virtuales\label{sec:virtual}}
 
+Una vez se dispone de los primeros resultados en los entornos físicos es posible iniciar con las pruebas dentro de diferentes entornos y configuraciones virtuales.
+Es fácil suponer que los nuevos resultados que se obtendrán dentro de un entorno virtualizado, sufrirán algún tipo de degradación pues inevitablemente existe una pequeña sobrecarga en el sistema debido a la ejecución simultanea de diversos sistemas operativos.
+
+Llegados a este punto, es interesante recordar la motivación de la virtualización. La virtualización en redes de comunicaciones suele venir por temas de escalabildiad, o problemas a la hora de insertar una nueva máquina en un \gls{cpd}. Esto significa, que en un principio la máquina virtual dedicada captura, va a compartir con una alta probabilidad la maquina física en la que se encuentra. Esto hace plantearse diferentes métodos para compartir los recursos y operar dentro de estas \glspl{vm}. Por ello, en esta sección se pretende mostrar, no solo las diferentes combinaciones de virtualización de los dispositivos, sino también, una comparativa en cuanto ventajas y desventajas que suponen cada uno de estos métodos.
+
+\subsection{Usando Paravirtualización: VIRTIO\label{sec:virtio}}
+
+Antes de que los sistemas de virtualización contasen con la tecnología necesaria para realizar \gls{passthough} o \gls{sriov}, se recurría a la virtualización completa del dispositivo y a la paravirtualización. Dado que el objetivo es alcanzar altas tasas de captura y almacenamiento, puede parecer poco producente dedicar esfuerzo a probar esta clase de tecnología que requiere un gran esfuerzo por parte del hypervisor a la hora de realizar el interconexionado entre el mundo físico y el mundo virtual.
+
+Dado que existe un gran esfuerzo en optimizar el sistema de paravirtualización de \gls{kvm} con los módulos \gls{virtio}, se ha decidido darle una oportunidad. A diferencia de un sistema de virtualziación completo, una paravirtualización construye un pequeño hardware virtual que permite compartir un determinado dispostivo hardware entre la máquina física y diversas máquinas virtuales. Este pequeño hardware virtual, es lo suficientemente ligero como para no suponer una elevada perdida de rendimiento pero lo suficientemente completo como para proporcionar, en principio, todas las funcionalidades del hardware original. Este hardware virtual, requiere a su vez de drivers especiales en las máquinas virtuales.
+
+Teniendo en cuenta que los dispositivos \gls{virtio} se construyen como una aplicación más que utiliza el hardware subyacente, parece que la aproximación de utilizar \gls{virtio} con la tarjeta de red, pierde sentido. Si bien, el driver \textit{ixgbe} es incapaz de ofrecer un rendimiento consistente e independiente del procesamiento, añadir una nueva capa de procesamiento solo empeorará el rendimiento. Por este motivo, se ha descartado utilizar \gls{virtio} con las tarjetas de red.
+
+Por otro lado, la idea de compartir el raid, parece llamativa. Dado que encontrar tarjetas Raid con soporte \textit{sriov} es complicado, además de encontrarse muy limitado, parece una tecnología interesante de probar.
 
 \subsection{Usando Passthrough\label{sec:pt}}
+
+Dentro de los modelos de virtualización clasicos, nos encontramos con el modelo de \gls{passthough}. Este sistema de virtualización consiste en la transferencia completa del control sobre un determinado dispositivo a la máquina virtual. De esta forma, una \gls{vm}, es capaz de utilizar los driver nativos para susodicho dispositivo.
 
 \begin{figure}[!htb]
 \centering
