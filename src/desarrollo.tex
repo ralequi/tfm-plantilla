@@ -103,7 +103,9 @@ En el mundo empresarial, predomina el uso de las distribuciones de linux basadas
 
 La mayoría de los entornos de virtualización de los que disponen las grandes compañías son: \gls{kvm}~\cite{bib:kvm}, XEN~\cite{bib:xen} o la versión profesional de VMWare~\cite{bib:vmware}. De cara a un presupuesto limitado, descartamos la opción de utilizar VMWare desde el principio. La decisión entre los hypervisores \gls{kvm} y XEN es algo más compleja pues son ambos sistemas muy utilizados, ambos son gratuitos y ambos se encuentran en auge. No obstante, se aprecia a la comunidad investigadora más enfocada en el entorno de \gls{kvm}, así como una gran cantidad de esfuerzo por parte de la comunidad de \gls{kvm} en el desarrollo de elementos y técnicas avanzadas de virtualización como \gls{virtio}. Por estos motivos, se ha escogido \gls{kvm} como método de virtualización.
 %
-Como optimización, dado que varios de los motores de captura hacen uso de las \gls{huge}, se ha configurado el sistema de virtualización \gls{kvm} para que reserve la memoria de las máquinas virtuales en \gls{huge} con el objetivo de que el rendimiento en las \glspl{vm} no se vea excesivamente afectado por problemas de paginación o problemas de cache. Las máquinas virtuales, a su vez, proveen \gls{huge} a los diferentes motores que se ejecutan en ellas.
+Como optimización, dado que varios de los motores de captura hacen uso de las \glspl{huge}, se ha configurado el sistema de virtualización \gls{kvm} para que reserve la memoria de las máquinas virtuales en \gls{huge} con el objetivo de que el rendimiento en las \glspl{vm} no se vea excesivamente afectado por problemas de paginación o problemas de cache~\cite{kudryastev2013pcs}. Las máquinas virtuales, a su vez, proveen \gls{huge} a los diferentes motores que se ejecutan en ellas.
+%
+Cada una de las máquinas virtuales utilizadas está formada por 3 \glspl{core} virtuales, mapeados y reservados en 3 \glspl{core} físicos. Cada máquina virtual cuenta a su vez con 5~GB de memoria RAM.
 
 Una vez que tenemos los más pilares básicos de nuestro sistema de captura, es necesario hacer un pequeño énfasis en lo que a funciones virtuales se refiere. Tal y como se ha explicado en capítulos anteriores, las funciones virtuales son a todos los efectos un dispositivo PCIe más. No obstante, las tarjetas Intel ofrecen diversas formas de crear y gestionar sus \glspl{nfv}. Por un lado, el driver \gls{vanilla} \textit{ixgbe}, permite indicar a la tarjeta que cree un número determinado de \glspl{nfv}, de una forma muy sencilla. No obstante, este tipo de funcionamiento delega todo el control de la función virtual a la tarjeta física, sin que la CPU intervenga en ningún caso en el trasiego de paquetes.
 %
@@ -250,11 +252,24 @@ Dado que existe un gran esfuerzo en optimizar el sistema de paravirtualización 
 
 Teniendo en cuenta que los dispositivos \gls{virtio} se construyen como una aplicación más que utiliza el hardware subyacente, parece que la aproximación de utilizar \gls{virtio} con la tarjeta de red, pierde sentido. Si bien, el driver \textit{ixgbe} es incapaz de ofrecer un rendimiento consistente e independiente del procesamiento, añadir una nueva capa de procesamiento solo empeorará el rendimiento. Por este motivo, se ha descartado utilizar \gls{virtio} con las tarjetas de red.
 
-Por otro lado, la idea de compartir el raid, parece llamativa. Dado que encontrar tarjetas Raid con soporte \textit{sriov} es complicado, además de encontrarse muy limitado, parece una tecnología interesante de probar.
+Por otro lado, la idea de poder compartir un raid entre diferentes máquinas virtuales parece atractiva. No obstante, resulta complicado encontrar tarjetas Raid con soporte \textit{sriov}, y las que lo soportan no suelen ser capaces de asociar un raid a más de una función virtual, impidiendo así su compartición. Por otro lado, los driver \gls{virtio} permiten compartir un cualquier dispositivo de bloques entre diferentes máquinas virtuales. Es importante mencionar, que dado que este tipo de compartición se hace a nivel de dispositivo de bloques, si varias máquinas virtuales escriben a la vez sobre un sistema de ficheros, pueden llegar a darse problemas e incluso a corromperse el sistema de ficheros perdiendo toda la información del Raid. A pesar de este riesgo, este modelo sigue resultando atractivo en temas de monitorización, en donde una máquina virtual escribe a disco los datos de red y otras máquinas virtuales los leen únicamente para realizar diferentes tipos de análisis.
+%
+Para analizar el rendimiento de los driver \gls{virtio} se ha realizado el mismo conjunto de pruebas de escritura en el raid que en la sección anterior cuyos resultados pueden observarse en la figura~\ref{fig:vmfisica:graphdd2}.
+Si miramos con detalle los resultados obtenidos, podremos observar que el rendimiento del raid no ha caído, sino que ha aumentado muy ligeramente con respecto a la versión física. Aunque pueda parecer extraño, esto es debido al funcionamiento de \gls{virtio}. Para suplir la sobrecarga de un minidriver, \gls{virtio} se asegura de realizar las escrituras en bloques de tamaños óptimos, buffereando las diferentes peticiones de escritura. Por este motivo, y de forma extraordinaria, las escrituras a disco mediante \gls{virtio} aparentan ser ligeramente más eficientes.
 
+\begin{figure}[!htb]
+\centering
+\includegraphics[scale=.7]{graph2}
+\caption{Rendimiento de escritura en Raid 0 utilizando VirtIO}
+\label{fig:vmfisica:graphdd2}
+\end{figure}
+
+\newpage
 \subsection{Usando Passthrough\label{sec:pt}}
 
-Dentro de los modelos de virtualización clasicos, nos encontramos con el modelo de \gls{passthough}. Este sistema de virtualización consiste en la transferencia completa del control sobre un determinado dispositivo a la máquina virtual. De esta forma, una \gls{vm}, es capaz de utilizar los driver nativos para susodicho dispositivo.
+Dentro de los modelos de virtualización clásicos, nos encontramos con el modelo de \gls{passthough}. Este sistema de virtualización consiste en transferir todo el control sobre un determinado dispositivo a la máquina virtual. De esta forma, una \gls{vm}, es capaz de utilizar los driver nativos para susodicho dispositivo mitigando enormemente los efectos de la virtualización.
+
+A pesar de que en términos de rendimiento la tecnología de \gls{passthough} se encuentra aventajada, esta forma de virtualización no permite que los recursos se compartan. Recordemos que una de las premisas de la virtualización es la compartición de recursos, ya que se asume que una única máquina virtual usualmente no explota al 100\% todos los recursos de los que dispone. En la figura~\ref{fig:vmpass} se muestra una arquitectura en la cual existen diversas máquinas virtuales. No obstante, aunque las aplicaciones dentro de una máquina virtual pueden compartir el harware, las aplicaciones de otras \glspl{vm} requieren sus propios dispositivos.
 
 \begin{figure}[!htb]
 \centering
@@ -263,18 +278,192 @@ Dentro de los modelos de virtualización clasicos, nos encontramos con el modelo
 \label{fig:vmpass}
 \end{figure}
 
-\subsection{Usando SR-IOV\label{sec:sriov}}
+Bajo este paradigma de virtualización, se han vuelto a repetir las pruebas de escritura en el raid. Dado que la máquina virtual gestiona la controladora raid de la misma forma que lo haría una máquina real, el rendimiento se ve muy poco alterado con el rendimiento medido en un entorno real. Los resultados de estas pruebas pueden verse en la figura~\ref{fig:vmfisica:graphdd3}.
 
 \begin{figure}[!htb]
 \centering
-\includegraphics[scale=.6]{VMsriov}
-\caption{Arquitectura de captura en un escenario con SR-IOV y NFVs}
+\includegraphics[scale=.7]{graph3}
+\caption{Rendimiento de escritura en Raid 0 utilizando Passthrough}
+\label{fig:vmfisica:graphdd3}
+\end{figure}
+
+Una de las ventajas que aportan las tarjetas de red de 10~Gbps de Intel es la representación de cada \gls{nic} como un dispositivo PCIe independiente. Esto permite que cada interfaz de la tarjeta de red pueda ser utilizada por una máquina diferente, ya sea esta física o virtual. Con el objetivo de observar como afecta dividir el tráfico entre un entorno físico y un entorno virtual, se han realizado pruebas en las siguientes 3 arquitecturas: 1 \gls{nic} en una única máquina virtual, 2 \glspl{nic} en una única máquina virtual y 2 \glspl{nic} (1+1) repartidas entre una máquina virtual y su sistema operativo anfitrión. Los resultados de la prueba de solo captura pueden verse en la taba~\ref{tab:vmpass:soloCap}.
+
+\begin{table}[htb]
+\centering
+\begin{tabular}{|c|c|c|c|c|c|c|}
+	\hline
+		\multirow{3}{*}{\begin{tabular}[c]{c}{\bf Motor}\\ {\bf de captura}\end{tabular}} & \multicolumn{6}{c|}{{\bf \% de paquetes procesados}}\\
+	\cline{2-7}
+		 & \multicolumn{2}{c|}{{\bf 1 \gls{nic}}} & \multicolumn{2}{c|}{{\bf 2 \glspl{nic}}} & \multicolumn{2}{c|}{{\bf 1+1 \glspl{nic}}} \\
+	\cline{2-7}
+		 & {\bf 64 Bytes }   & {\bf CAIDA}  & {\bf 64 Bytes}   & {\bf CAIDA} & {\bf 64 Bytes}   & {\bf CAIDA}  \\ \hline
+		ixgbe         & 1.9   & 62.7    & 2.5   & 41.8     & 6.2   & 83.7   \\ \hline
+		PF\_RING      & 99.8  & 100     & 75.2  & 100      & 99.7  & 100    \\ \hline
+		HPCAP         & 85.2  & 100     & 33.6  & 99.9     & 89.9  & 100    \\ \hline
+		DPDK          & 100   & 100     & 100   & 100      & 100   & 100    \\ \hline
+\end{tabular}
+\caption{Porcentaje de paquetes capturados mediante Passthrough sin almacenamiento de paquetes.}
+\label{tab:vmpass:soloCap}
+\end{table}
+
+En los resultados mostrados por la tabla anterior, se aprecia una pequeña degradación en el rendimiento cuando una única máquina virtual gestiona más de 1 \gls{nic}. Es probable que este efecto se deba a que cada una de las \glspl{vm} tiene un número de recursos limitado inferior al del sistema operativo anfitrión. Si los motores de captura requieren más recursos (ya sean \glspl{core} o memoria) y no disponen de ellos, inevitablemente el rendimiento se ve afectado.
+
+\begin{table}[htb]
+\centering
+\begin{tabular}{|c|c|c|c|c|}
+	\hline
+		\multirow{3}{*}{\begin{tabular}[c]{c}{\bf Motor}\\ {\bf de captura}\end{tabular}} & \multicolumn{4}{c|}{{\bf \% de paquetes procesados}}\\
+	\cline{2-5}
+		 & \multicolumn{2}{c|}{{\bf Raid en Passthrough}} & \multicolumn{2}{c|}{{\bf Raid en VirtIO}} \\
+	\cline{2-5}
+		 & {\bf 64 Bytes }   & {\bf CAIDA}  & {\bf 64 Bytes}   & {\bf CAIDA}  \\ \hline
+		HPCAP         & 82.2  & 100    & 82.8    & 100     \\ \hline
+		DPDK          & 97.6  & 100    & 95.3    & 100  \\ \hline
+\end{tabular}
+\caption{Porcentaje de paquetes almacenados en un escenario con Passthrough.}
+\label{tab:vmpass:CapAlmac}
+\end{table}
+
+Finalmente, en la tabla~\ref{tab:vmpass:CapAlmac}, se muestran los resultados de las pruebas de realizar almacenamiento y captura simultáneamente sobre una única máquina virtual. Esta tabla muestra a su vez el rendimiento de captura del sistema tanto cuando el raid se encuentra conectado mediante \gls{virtio}, como cuando se encuentra conectado mediante \gls{passthough}. Es interesante observar nuevamente el efecto de las filosofías \gls{onecopy} y \gls{zerocopy}. A pesar de que la escritura mediante \gls{virtio} mejora ligeramente el rendimiento del raid, las copias intermedias causan un breve aumento en la latencia y duración del pipeline de proceso. Mientras que el motor de captura \gls{dpdk} se ve afectado negativamente por el aumento de este retardo, el motor de captura \textit{HPCAP} tiene una mayor independencia y se ve beneficiado por el aumento de velocidad medio.
+
+
+\subsection{Usando SR-IOV\label{sec:sriov}}
+
+La tecnología \gls{sriov} ofrece multitud de ventajas frente a los otros métodos de virtualización, no sin por supuesto, traer nuevos inconvenientes. La mayor ventaja que ofrece \gls{sriov} es la compartición de recursos, al igual que lo es su mayor desventaja, pues se crea un cuello de botella. Cuando hablamos de \gls{sriov} en redes de comunicaciones, comúnmente estamos hablando de \gls{nfv}, es decir funciones virtuales de una determinada interfaz de red. Recordemos, que para que una tarjeta de red pueda crear diversas \glspl{nfv}, es necesario que la tarjeta física actúe a su vez como un switch entre las diferentes \glspl{nfv}. Esto aporta cierto valor añadido, pues mejora la comunicación interna entre las diferentes máquinas virtuales. Como contraparte, da un mayor trabajo a la tarjeta de red.
+
+Dentro de este contexto, surge una nueva arquitectura de captura de tráfico. Dado que existen \glspl{nfv} en nuestro escenario, la aplicación de captura comparte las interfaces con otras aplicaciones de red (como puede ser un servidor web apache, una base de datos, o cualquier aplicación que utilice la red). Todas estas aplicaciones, tanto en máquinas máquinas virtuales, como en el propio anfitrión, utilizan un driver virtual para explotar un segmento de los recursos físicos de la tarjeta de red.
+En la figura~\ref{fig:vmsriov} se presenta una arquitectura de captura en la que hay presentes diferentes elementos todos ellos conectados mediante \gls{sriov} y drivers virtuales. Nótese, que siguen existiendo elementos (la controladora Raid) que siguen siendo virtualizados con \gls{passthough} pues no disponen de \gls{sriov}.
+
+\begin{figure}[!htb]
+\centering
+\includegraphics[scale=.7]{VMsriov}
+\caption{Arquitectura de captura en un escenario con SRIOV y NFVs}
 \label{fig:vmsriov} 
 \end{figure}
 
 %contar la diferencia de generación de NFV
-
 \subsubsection{Comparativa de construcción de \glspl{nfv}}
 
+Para que un dispositivo genere funciones virtuales, es necesaria la presencia de un driver en la máquina anfitriona que configure el dispositivo físico (número de \glspl{vf}, tamaños de las colas, reparto de interrupciones, etc). Para el caso de las tarjetas de Intel de 10~Gbps, el driver \gls{vanilla} ofrece esta funcionalidad de una manera muy cómoda. Este driver cumple con la filosofía de \gls{sriov} de delegar en la tarjeta todo el proceso de reparto de interrupciones y paquetes entre las diferentes \gls{nfv}.
 
-\subsubsection{Comparativa de construcción de \glspl{nfv}}
+No obstante, Intel ofrece una segunda forma de gestionar estas \glspl{nfv}. Los drivers de \gls{dpdk} permiten a su vez generar estas funciones virtuales, pero a diferencia del driver \textit{ixgbe}, es necesario ejecutar un programa sobre \gls{dpdk} para que estas \gls{nfv} reciban tráfico. El programa, conocido como \textit{testpmd}, ayuda activamente a la tarjeta liberándola en parte de la lógica que supone realizar de switch y la copia de paquetes entre la cola de recepción física y las colas asociadas a cada función virtual.
+A su vez este programa permite configurar elementos a muy bajo nivel de la tarjeta, que en el driver \textit{ixgbe} supondría modificar el código del propio driver.
+
+En la tabla~\ref{tab:vmsriov:sriov} se muestra una comparativa entre los diferentes métodos de generación de \gls{nfv}. Claramente, parece que el sistema de generación mediante \gls{dpdk} supera por mucho en rendimiento al driver \gls{vanilla}. Por otro lado, para que la aplicación \textit{testpmd} funcione a pleno rendimiento, es necesario reservarla un \gls{core} completo por cada función virtual, al igual que otro \gls{core} para ejecutar la interfaz. Esta limitación obliga a la larga a disponer de un gran número de cores que tan solo copian paquetes entre colas físicas y virtuales.
+
+\begin{table}[htb]
+\centering
+\begin{tabular}{|c|c|c|}
+	\hline
+		\multirow{2}{*}{\begin{tabular}[c]{c}{\bf Motor}\\ {\bf de captura}\end{tabular}} & \multicolumn{2}{c|}{{\bf \% de paquetes procesados}}\\
+	\cline{2-3}
+		 & {\bf Gen. Ixgbe }   & {\bf Gen. \gls{dpdk}}    \\ \hline
+		ixgbevf         & >0.1  & 1     \\ \hline
+		HPCAPvf         & 36.2  & 82.7     \\ \hline
+		DPDK            & 37.6  & 100    \\ \hline
+\end{tabular}
+\caption{Porcentaje de paquetes capturados en función del método de generación de NFV. El tráfico utilizado estaba formado por paquetes de tamaño mínimo (64Bytes).}
+\label{tab:vmsriov:sriov}
+\end{table}
+
+
+\subsubsection{Pruebas de recepción con \glspl{nfv}}
+
+De cara a realizar pruebas con \glspl{nfv}, es necesario mencionar algunos detalles implementativos. Cada \gls{nfv}, a diferencia de su hermana física, tiene una única cola de recepción y transmisión. Por temas de diseño, las \glspl{nfv} tampoco cuentan con contadores de paquetes perdidos, o erróneos, por lo que obtener estos datos es necesario inferirlos de las estadísticas que ofrecen las funciones físicas. Por este motivo, no se han podido medir con exactitud las pérdidas en los diferentes escenarios con \gls{nfv}, no obstante, se han obtenido datos bastante aproximados.
+
+Como se ha mencionado anteriormente, la tarjeta física, es la encargada en última instancia de gestionar hacia que \gls{nfv} se envía cada uno de los paquetes recibidos. Para determinarlo, cada \gls{nfv} posee su propia dirección MAC virtual. Con el objetivo de probar la escalabilidad en función de máquinas virtuales y \glspl{nfv} por \gls{nic} física, se han utilizado 3 máquinas virtuales con dos 2 \glspl{core} virtuales cada una.
+Cada \gls{vm} cuenta con una \gls{nfv} con MAC única. Para medir el rendimiento, estas máquinas virtuales ejecutan en paralelo la versión de solo captura desarrollada en \gls{dpdk}. Para realizar las pruebas se han creado 3 trazas de tráfico sinténtico. La primera traza contiene paquetes de tamaño 64 Bytes, todos ellos con una única dirección MAC. La segunda traza, contiene 2 direcciones MAC en una proporcion del 50\% cada una. La tercera traza, contiene 3 direcciones MAC, en una proporcion del 33.3\% cada una.
+
+Los resultados obtenidos de las pruebas figura en la tabla~\ref{tab:vmsriov:rnfv}. En esta tabla, se pueden observar ligeras pérdidas pues no se llegan a alcanzar los 10~Gbps. No obstante, el rendimiento parece escalar y no se ve aparentemente afecto por el número de \glspl{nfv} que hay en el sistema o el número de máquinas virtuales en ejecución.
+
+\begin{table}[htb]
+\centering
+\begin{tabular}{|c|c|c|}
+	\hline
+		\multirow{2}{*}{\begin{tabular}[c]{c}{\bf Número de}\\ {\bf MACs emitidas}\end{tabular}} & \multicolumn{2}{c|}{{\bf \% de paquetes procesados}}\\
+	\cline{2-3}
+		 & {\bf Por cada \gls{vm} }   & {\bf En total}    \\ \hline
+		1         & 99.5  & 99.5     \\ \hline
+		2         & 49.7  & 99.4     \\ \hline
+		3         & 33.2  & 99.5     \\ \hline
+\end{tabular}
+\caption{Porcentaje de paquetes capturados en función del número de \glspl{vm} y de direcciones MAC destino}
+\label{tab:vmsriov:rnfv}
+\end{table}
+
+\subsubsection{\glspl{nfv} con captura promíscua}
+
+No obstante, el método nativo de funcionamiento de las \gls{nfv}, no nos sirve para poder construir una sonda de tráfico virtual, pues en un principio solo seríamos capaces de capturar el tráfico destinado a nuestra función virtual. Si el objetivo de nuestro sistema es ofrecer un servicio por una determinada interfaz y a la vez capturar por esta, podemos recurrir a la bandera \gls{mpe}~\cite{825992010}. Esta bandera puede ser configurada a través del programa \textit{testpmd}, e indica a la tarjeta que reenvíe todos aquellos paquetes sin destino conocido a una determinada \gls{nfv}. Nótese, que esta aproximación no nos reenvía aquellos paquetes destinados a una dirección MAC asociada a otra \gls{nfv} de nuestro sistema. No obstante, esta aproximación es sencilla y permite a la tarjeta funcionar a alta velocidad, además de ser completamente válida si mantenemos la arquitectura del típico puerto de SPAN.
+
+En la tabla~\ref{tab:vmvirtio:soloCapA} se muestran los resultados de solo captura. En este escenario, se pretende probar el rendimiento que ofrecen las \glspl{nfv} bajo condiciones habituales. Para ello, se realizan 3 pruebas simples: Una única \gls{vm} conectada a una \gls{nfv}, una única \gls{vm} conectada a dos \gls{nfv} (cada una correspondiente a una \gls{nic} diferente) y finalmente, 2 \glspl{vm} conectadas a 2 \gls{nfv} generadas a partir de la misma \gls{nic}.
+%
+Los resultados de la tabla son en parte similares a otras pruebas ya realizadas, aunque caben destacar algunos resultados. Para el caso de \textit{HPCAPfv}, al gestionar 2 \glspl{nfv} en una máquina virtual con pocos recursos, se ve saturado rápidamente y el rendimiento cae por falta de \glspl{core}. En el caso de utilizar dos máquinas virtuales en paralelo compartiendo \gls{nic}, se observa que tanto en el motor \gls{dpdk} como en el motor de captura\textit{HPCAPvf}, tienen resultados similares. Esta última prueba de doble \gls{nfv} y doble \gls{vm}, se realizó mediante una traza de paquete mínimo con la MAC destino a broadcast, de forma que todos las \glspl{nfv} recibieran todos y cada uno de los paquetes. Si tenemos esto en cuenta, aunque el tráfico que llega por la interfaz se recibe a 10~Gbps, la tarjeta debe enviar datos a las diferentes \glspl{nfv} a 20~Gbps. Con esto en mente, el 51\% o el 44.1\% de 20~Gbps, se asemeja mucho a valores obtenidos anteriormente.
+
+\begin{table}[htb]
+\centering
+\begin{tabular}{|c|c|c|c|c|c|c|}
+	\hline
+		\multirow{3}{*}{\begin{tabular}[c]{c}{\bf Motor}\\ {\bf de captura}\end{tabular}} & \multicolumn{6}{c|}{{\bf \% de paquetes procesados}}\\
+	\cline{2-7}
+		 & \multicolumn{2}{c|}{{\bf 1 \gls{nfv}}} & \multicolumn{2}{c|}{{\bf 2 \glspl{nfv}}} & \multicolumn{2}{c|}{{\bf (1+1) 2\glspl{nfv}/2\glspl{vm}}} \\
+	\cline{2-7}
+		 & {\bf 64 Bytes }   & {\bf CAIDA}  & {\bf 64 Bytes}   & {\bf CAIDA} & {\bf 64 Bytes}   & {\bf CAIDA}  \\ \hline
+		ixgbePvf      & 1     & 34.2    & 1     & 42.4     & 0.9   & 14.8    \\ \hline
+		HPCAPvf       & 82.7  & 100     & 13.0  & 100      & 44.1  & 82.7    \\ \hline
+		DPDK          & 100   & 100     & 100   & 100      & 50.8  & 83.0    \\ \hline
+\end{tabular}
+\caption{Porcentaje de paquetes capturados y no almacenados en un escenario con SRIOV y flag MPE.}
+\label{tab:vmvirtio:soloCapA}
+\end{table}
+
+%%%%
+En la tabla~\ref{tab:vmvirtio:CapAlmac1} se muestran los resultados de captura y almacenamiento cuando solo hay una única \gls{nfv} y una única \gls{vm} en ejecución. Es interesante apreciar como la sobrecarga de la virtualización con \gls{virtio} y \gls{nfv} incrementa lo suficiente la latencia del pipeline de captura de la herramienta de \gls{dpdk} como para hacerla perder una enorme cantidad de paquetes.
+
+\begin{table}[htb]
+\centering
+\begin{tabular}{|c|c|c|c|c|}
+	\hline
+		\multirow{3}{*}{\begin{tabular}[c]{c}{\bf Motor}\\ {\bf de captura}\end{tabular}} & \multicolumn{4}{c|}{{\bf \% de paquetes procesados}}\\
+	\cline{2-5}
+		 & \multicolumn{2}{c|}{{\bf Raid en Passthrough}} & \multicolumn{2}{c|}{{\bf Raid en VirtIO}} \\
+	\cline{2-5}
+		 & {\bf 64 Bytes }   & {\bf CAIDA}  & {\bf 64 Bytes}   & {\bf CAIDA}  \\ \hline
+		HPCAPvf       & 82.6  & 100    & 82.3    & 100     \\ \hline
+		DPDK          & 94.2  & 100    & 68.2    & 100  \\ \hline
+\end{tabular}
+\caption{Porcentaje de paquetes almacenados en un escenario con SRIOV y flag MPE.}
+\label{tab:vmvirtio:CapAlmac1}
+\end{table}
+
+\subsubsection{\glspl{nfv} con captura global}
+
+En las secciones anteriores de \glspl{nfv}, se ha hablado acerca de como funciona el reparto de paquetes entre las diferentes funciones y de como es posible capturar tráfico que no va destinado a ninguna función virtual. No obstante, uno de los objetivos de este trabajo es evaluar el proceso de monitorización en redes virtuales. Para lograrlo, el datasheet de las tarjetas de Intel~\cite{825992010} nos proporciona información acerca del concepto de \textit{Port Mirroring}. A través de una serie de registros, es posible indicar a la tarjeta de red, que copie todos los paquetes que entren o salgan de una cola a otra cola. Dado que cada \gls{nfv}, tiene asociada una única cola, es posible forzar la copia del contenido de una \gls{nfv} a otra \gls{nfv}. Toda esta configuración de \textit{mirroring} puede ser configurada a través de la aplicación \textit{testpmd}.
+
+La idea principal para realizar esta prueba consiste en utilizar las 3 máquinas virtuales mencionadas al inicio de esta subsección como consumidoras de tráfico, mientras que una cuarta máquina virtual, con la configuración estándar utilizada hasta ahora(y descrita en la sección~\ref{sec:sw}), monitorice el tráfico entre dichas \glspl{vm}.
+Dado que el equipo de pruebas tiene arquitectura \gls{numa} y los recursos de las 4 \glspl{vm} exceden los recursos de un procesador, es necesario distribuir las diferentes \glspl{vm} entre los procesadores. Dado que la localización de las \gls{vm} puede afectar al rendimiento, se ha decidido agrupar las 3 \glspl{vm} consumidoras en un mismo procesador, pues comparten funcionalidad similar, y la \gls{vm} de monitorización en otro procesador. 
+
+En la tabla~\ref{tab:vmvirtio:CapAlmac2} se muestra un breve resumen de las pruebas realizadas. Por un lado, los resultados muestran una tasa acotada de Gbps que pueden ser capturados mediante este método. Dado que el \textit{Port Mirroring} consiste en duplicar todos y cada uno de los paquetes, el hecho de que el rendimiento decrezca es razonable, pues en definitiva se están recibiendo al menos el doble Gbps.
+Un dato curioso, son los resultados de rendimiento. Si recordamos la arquitectura de la sonda de prueba, el tarjeta de red se encuentra conectada en el nodo \gls{numa}. Dado que este nodo es el más cercano a la tarjeta, parece razonable ejecutar la \gls{vm} en este nodo. No obstante, cuando la \gls{vm} es capaz de capturar mucho más tráfico cuando se encuentra en el nodo \gls{numa} 1.
+Este efecto ha de tenerse en cuenta, pues el \textit{Port Mirroring}, no redirige los paquetes a la \gls{vm} de captura, salvo que dicho paquete ya haya sido atendido por la \gls{vm} adecuada. Por ello, situar las máquinas consumidoras en el nodo más cercano a la tarjeta favorece la cantidad de paquetes capturados mediante la técnica del \textit{Port Mirroring}.
+
+\begin{table}[!htb]
+\centering
+\begin{tabular}{|c|c|c|c|}
+	\hline
+	\multirow{2}{*}{\begin{tabular}[b]{c}{\bf Motor}\\ {\bf de captura}\end{tabular}} & \multirow{2}{*}{\begin{tabular}[b]{c}{\bf Nodo Numa}\\ {\bf de captura}\end{tabular}} & \multicolumn{2}{c|}{{\bf \% de paquetes procesados}}\\
+	\cline{3-4}
+	& &  {\bf 64 Bytes } & {\bf CAIDA} \\
+	\hline
+			\multirow{2}{*}{HPCAPvf} & 0  &  30.7   &  48.0  \\
+		\cline{2-4} 
+			& 1  &   47.4  &  76.7  \\
+	\hline
+			\multirow{2}{*}{DPDK} & 0  &  22.8   & 38.4   \\
+		\cline{2-4} 
+			& 1  &   50.4  &  76.8  \\
+	\hline
+\end{tabular}
+	\caption{Porcentaje de paquetes almacenados en un escenario con SRIOV y Port Mirroring. Captura del tráfico interno de una red virtual formada por 3 VMs. El raid de almacenamiento se encuentra configurado con VirtIO}
+	\label{tab:vmvirtio:CapAlmac2}
+\end{table}
