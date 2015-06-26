@@ -1,3 +1,10 @@
 \chapter{Conclusiones y Trabajo futuro\label{sec:conclusiones}}
 
-TODO: Conclusiones sobre el trabajo realizado
+A lo largo de este trabajo se ha explorado el estado actual tanto de los sistemas de captura como de los sistemas de virtualización. Se han realizado multitud de pruebas para comparar las diferentes aplicaciones y entornos. A pesar de ello, aún existen combinaciones de propiedades y configuraciones que aún no han sido exploradas y probadas.
+
+Del mismo modo, estas tecnologías se encuentran en un constante desarrollo. Al cabo de unos pocos años aparece una nueva tecnología de virtualización o captura que rompe drásticamente con lo establecido. No hace tanto, se hacia desarrollo en FPGA para poder capturar y procesa tráfico, y ahora mediante unas típicas tarjetas de red y con un poco de cuidado es posible alcanzar 10 e incluso 40 Gbps. De forma similar los entornos de virtualización parecían una pérdida de tiempo y energía, y ahora la mayor parte de la computación y de los servidores del mundo se encuentran virtualizados en la nube.
+
+Por estos motivos, pienso que la gran mayoría de este tipo de tecnología ser encuentra aún en pañales. Un claro ejemplo es la tecnología DPDK. Este motor de captura promete dejar obsoletos al resto. No obstante, las diversas actualizaciones van cambiando la API así como la eficiencia de ciertos elementos, convirtiéndola en una API poco estable para desarrollar. Si comparamos DPDK con otros driver mucho más simples como HPCAP, vemos que aún hay margen de mejora. Una de las conclusiones más relevantes de este trabajo radica en la comparativa entre las filosofías de onecpy y zerocpy.
+
+
+\lsection{Trabajo futuro}
