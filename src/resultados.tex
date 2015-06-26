@@ -1,3 +1,76 @@
-\chapter{Resultados y Comparativa\label{sec:resultados}}
+\chapter{Resumen de resultados y comparativas\label{sec:resultados}}
 
-TODO: Pruebas y resultados
+A lo largo del capítulo~\ref{sec:desarrollo}, se han explicado las diferentes pruebas realizadas de los elementos que conforman los sistemas de captura y almacenamiento tanto en entornos físicos como virtuales.
+
+
+\begin{table}[htb]
+	\centering
+	%\renewcommand{\arraystretch}{1.2}
+	\begin{tabular}{|c|c|c|c|}
+		\hline
+		\multirow{3}{*}{\begin{tabular}[c]{c}{\bf Número}\\ {\bf de discos}\end{tabular}} & \multirow{3}{*}{{\bf Modo}} & \multicolumn{2}{c|}{{\bf Rendimiento (Gbps)}} \\
+		\cline{3-4} 
+		& & {\bf Media} & \begin{tabular}[c]{c}{\bf Intervalo de confianza}\\ ($\alpha$=0.01)\end{tabular} \\
+		\hline
+		\multirow{3}{*}{1} & Físico   & 1.27    & (1.27, 1.28)     \\
+		\cline{2-4} 
+		& \gls{virtio}         & 1.29    & (1.25, 1.34) \\
+		\cline{2-4} 
+		& \gls{passthough}          & 1.27    & (1.27, 1.28)   \\
+		\hline
+		\multirow{3}{*}{8} & Físico     & 9.93    & (9.89, 9.96) \\
+		\cline{2-4} 
+		& \gls{virtio}          & 9.96    & (9.79, 10.13) \\
+		\cline{2-4} 
+		& \gls{passthough}            & 9.91    & (9.85, 9.96) \\
+		\hline
+		\multirow{3}{*}{9} & Físico    & 11.16   & (11.09, 11.23) \\
+		\cline{2-4} 
+		& \gls{virtio}         & 11.21   & (11.03, 11.39) \\
+		\cline{2-4} 
+		& \gls{passthough}           &  11.15 & (11.09, 11.21) \\
+		\hline
+	\end{tabular}
+	\caption{Tasa de escritura en Raid 0, en función del modo de funcionamiento (físico o con virtualización) y el número de discos}
+	\label{tab:raidperf}
+\end{table}
+
+
+\begin{table}[htb]
+\centering
+\begin{minipage}[c]{\textwidth}
+\resizebox{\textwidth}{!}{
+\begin{tabular}{|c|c|c|c|c|c|c|}
+	\hline
+	\multicolumn{2}{|c|}{  \multirow{2}{*}{{\bf I/O configuration}  }} & \multirow{3}{*}{\begin{tabular}[b]{c}{\bf Capture}\\ {\bf engine}\end{tabular}} & \multicolumn{4}{c|}{{\bf \% of packets processed}}   \\
+	\cline{4-7}
+	\multicolumn{2}{|c|}{}  &  & \multicolumn{2}{c|}{  {\bf 64-byte packets}  } & \multicolumn{2}{c|}{  {\bf CAIDA trace}  }  \\
+	\cline{1-2} \cline{4-7} 
+	{\bf Network} & {\bf Storage} &  &  \begin{tabular}[c]{c}{\bf Capture}\\{\bf only}\end{tabular} &  \begin{tabular}[c]{c}{\bf Capture}\\{\bf and storage}\end{tabular} & \begin{tabular}[c]{c}{\bf Capture}\\{\bf only}\end{tabular} &\begin{tabular}[c]{c}{\bf Capture}\\{\bf and storage}\end{tabular} \\
+	\hline
+		\multicolumn{2}{|c|}{\multirow{2}{*}{Bare-metal}} & DPDK & 100.0 & 95.8 & 100.0 & 100.0\\
+		\cline{3-7} 
+		\multicolumn{2}{|c|}{} & HPCAP & 97.9 & 95.7 & 100.0 & 100.0 \\
+	\hline
+			\multirow{4}{*}{PT} & \multirow{2}{*}{PT}     & DPDK     & 100.0    &    97.6    & 100.0    &  100.0 \\
+			\cline{3-7} 
+			& & HPCAP        & 85.2      &    82.3    & 100.0 &  100.0  \\
+		\cline{2-7} 
+		 & \multirow{2}{*}{VirtIO} & DPDK   & 100.0    &  95.3  & 100.0  & 100.0  \\
+		 \cline{3-7}
+		 &     & HPCAP      & 85.2  &  82.8 & 100.0    &  100.0 \\
+	\hline
+			\multirow{4}{*}{VF} &  \multirow{2}{*}{PT}    & DPDK    & 100.0   &   94.2   & 100.0   & 100.0  \\
+			\cline{3-7} 
+			&   & HPCAPvf     & 82.7    &  82.6  & 100.0   &  100.0 \\
+		\cline{2-7} 
+			 & \multirow{2}{*}{VirtIO} & DPDK   & 100.0   & 68.0   & 100.0  & 100.0   \\
+			 \cline{3-7}
+			 &     & HPCAPvf  & 82.7  & 82.3  & 100.0 & 100.0 \\
+	\hline
+\end{tabular}
+}
+\end{minipage}
+	\caption{Percentage of packets processed for diverse virtual I/O configuration in a network probe for packet capture only and packet capture and storage.}
+	\label{tab:virtcapwr}
+\end{table}
