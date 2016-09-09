@@ -52,6 +52,7 @@ Autores
 ----
 Este proyecto ha sido desarrollado por:
 - Rafael Leira Osuna ([@ralequi](https://github.com/ralequi))
+- Diego Hernando Loeda ([@dloeda](https://github.com/dloeda))
 - Jose Fernando Zazo ([@jfzazo](https://github.com/jfzazo))
 - Mario Daniel Ruiz Noguera ([@mariodruiz](https://github.com/mariodruiz))
 - Sid ([@JSidrach](https://github.com/JSidrach)), al que hay que agradecer en especial su contribución a la creación de una plantilla facil de utilizar, así como la primera versión de github disponible
