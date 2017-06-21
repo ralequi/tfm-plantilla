@@ -2,7 +2,7 @@
 
 # Compilar
 echo -n $'Compilando... pdflatex (1/3)\r'
-pdflatex -interaction=nonstopmode main.tex > /dev/null
+pdflatex -interaction=nonstopmode --shell-escape main.tex > /dev/null
 
 echo -n $'Compilando... bibtex\r'
 bibtex main > /tmp/bibtex.log
@@ -11,11 +11,11 @@ echo -n $'Compilando... makeglossaries\r'
 makeglossaries main > /tmp/makeglossaries.log
 
 echo -n $'Compilando... pdflatex (2/3)\r'
-pdflatex -interaction=nonstopmode main.tex > /dev/null
+pdflatex -interaction=nonstopmode --shell-escape main.tex > /dev/null
 
 echo -n $'Compilando... pdflatex (3/3)\r'
-pdflatex -interaction=nonstopmode main.tex > /tmp/pdflatex.log
-mv main.pdf "Trabajo de Fin de Master.pdf"
+pdflatex -interaction=nonstopmode --shell-escape main.tex > /tmp/pdflatex.log
+mv main.pdf "Trabajo Fin de Master.pdf"
 
 # Limpiar archivos auxiliares
 echo -n $'Limpiando...\r'
