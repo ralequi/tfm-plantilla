@@ -37,6 +37,8 @@
 \usepackage{float}
 % Imágenes
 \usepackage[pdftex]{graphicx}
+% Figuras en formato .png, .ps, pdf o eps
+\DeclareGraphicsExtensions{.png,.eps,.ps,.pdf}
 % Mejora de las tablas
 \usepackage{array}
 % Mejora de los símbolos matemáticos
@@ -53,16 +55,40 @@
 \usepackage{bookmark}
 % Estilo de enumeraciones
 \usepackage{enumitem}
+\setitemize{itemsep=1pt}
+\setitemize{topsep=0pt}
 % Espacio entre líneas y párrafos
 \usepackage{setspace}
 % Glosario/Acrónimos
-\usepackage[acronym]{glossaries}
+\usepackage[toc,section=chapter,acronym]{glossaries}
 % Fuentes
 \usepackage[T1]{fontenc}
 % Tablas con Multifila y Multicolumna
 \usepackage{multirow}
 % Bibliografía (Ordenacion, etc)
 \usepackage{cite}
+% Añadir el índice al índice del pdf
+\usepackage{tocbibind}
+% Code listings
+\usepackage{listings}
+\usepackage[newfloat]{minted}
+\SetupFloatingEnvironment{listing}{name=Código}
+\SetupFloatingEnvironment{listing}{listname=Índice de códigos}
+%\renewcommand\listingscaption{Código}
+\usemintedstyle{tango}
+% http://tex.stackexchange.com/a/289964
+\usepackage{morewrites}
+% https://tex.stackexchange.com/a/38771
+\usepackage{amsfonts}
+% https://tex.stackexchange.com/a/101860
+\usepackage[export]{adjustbox}% http://ctan.org/pkg/adjustbox
+% Referencias inteligentes
+\usepackage[capitalise,noabbrev,spanish]{cleveref}
+
+% https://tex.stackexchange.com/a/10540
+\usepackage{tabularx}
+% https://tex.stackexchange.com/a/89932
+\newcolumntype{Y}{>{\centering\arraybackslash}X}
 
 % Enlaces
 \hypersetup{hidelinks,pageanchor=true,colorlinks,citecolor=Fuchsia,urlcolor=black,linkcolor=Cerulean}
@@ -171,3 +197,34 @@
     \vspace{5mm}
     \lstset{basicstyle=\ttfamily\footnotesize,#1}}
   {\endminipage}
+
+
+% caracteres de tick y cruz
+\usepackage{pifont}% http://ctan.org/pkg/pifont
+\newcommand{\cmark}{\ding{51}}%
+\newcommand{\xmark}{\ding{55}}%
+% para que una celda pueda ocupar varais filas en una tabla
+\usepackage{multirow}
+
+
+% evitar lineas viudas
+\clubpenalty10000
+\widowpenalty10000
+
+% https://tex.stackexchange.com/a/19767
+\usepackage{placeins} % FloatBarrier
+
+\newtheorem{theorem}{Teorema}[section]
+\newtheorem{corollary}{Corolario}[theorem]
+\newtheorem{lemma}[theorem]{Lema}
+
+% https://en.wikibooks.org/wiki/LaTeX/Glossary#Dual_entries_with_reference_to_a_glossary_entry_from_an_acronym
+\usepackage{xparse}
+\DeclareDocumentCommand{\newdualentry}{ O{} O{} m m m m } {
+  \newglossaryentry{gls-#3}{name={#5},text={#5\glsadd{#3}},
+    description={#6},#1
+  }
+  \makeglossaries
+  \newacronym[see={[Glossary:]{gls-#3}},#2]{#3}{#4}{#5\glsadd{gls-#3}}
+}
+
