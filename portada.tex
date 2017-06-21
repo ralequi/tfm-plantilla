@@ -5,14 +5,20 @@
 % Universidad, Facultad
 \begin{titlepage}
 \selectlanguage{spanish}
-\begin{center}
-\textbf{\begin{huge}
-\universidad \\
-\end{huge}}
+$ $ % HACK
+
 \bigskip
-\begin{LARGE}
-\facultad \\
-\end{LARGE}
+
+\begin{center}
+{\fontsize{18}{22}\selectfont
+\textbf{
+\universidad \\
+}
+}
+\bigskip
+{\fontsize{14}{17}\selectfont
+\textbf{\facultad} \\
+}
 \end{center}
 
 \bigskip
@@ -29,39 +35,44 @@
 	\end{center}
 \end{figure}
 
-\bigskip
-\bigskip
-\bigskip
-
-% Máster
-\begin{center}
-\begin{large}
-\textbf{\master}\\
-\end{large}
-\end{center}
-
-\bigskip
+%\bigskip
 
 \textbf{\begin{center}
-\begin{huge}
+{\fontsize{18}{22}\selectfont
 \MakeUppercase{Trabajo Fin de Máster}
-\end{huge}
+}
 \end{center}}
 
 \bigskip
 \bigskip
 
-% Nombre del TFG
+% Nombre del TFM
+{\fontsize{26}{31}\selectfont
 \begin{center}
-\textbf{\begin{large}
-\MakeUppercase{\nombretrabajo}\\
-\end{large}}
+\textbf{{\nombretrabajo}}
 \end{center}
+}
 
+\bigskip
+\bigskip
+
+% Máster
+{\fontsize{18}{22}\selectfont
+\begin{center}
+\begin{large}
+\textbf{\master}\\
+\end{large}
+\end{center}
+}
+
+\bigskip
+\bigskip
+
+{\fontsize{16}{19}\selectfont
 % Nombre del autor
 \vspace{\fill}
 \begin{center}
-\textbf{\nombreautor}\\
+\textbf{Autor: \nombreautor}\\
 % Tutor
 \textbf{Tutor: \nombretutor}\\
 % Ponente, si está definido en main.tex
@@ -70,13 +81,17 @@
 \fi
 
 \bigskip
+\bigskip
 
 % Fecha
 \textbf{\fecha}\\
 \end{center}
+}
 \end{titlepage}
 
-% Primera página
+
+
+%%%%%%%%%%%%%%%%%%%%%%%% Primera página %%%%%%%%%%%%%%%%%%%%%%%%
 \pagenumbering{Alph}
 \thispagestyle{empty}
 \par\vspace*{\fill}
