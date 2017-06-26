@@ -2,17 +2,24 @@
 % Portada
 %
 
+% añadir entrada en el índice del pdf
+\pdfbookmark{Portada}{Portada}
+
 % Universidad, Facultad
 \begin{titlepage}
 \selectlanguage{spanish}
+$ $ % HACK
+
+\bigskip
+
 \begin{center}
-\textbf{\begin{huge}
-\universidad \\
-\end{huge}}
-\bigskip 
-\begin{LARGE}
-\facultad \\
-\end{LARGE}
+{\fontsize{18}{22}\selectfont
+\MakeUppercase{\textbf{\universidad}} \\
+}
+\bigskip
+{\fontsize{14}{17}\selectfont
+\MakeUppercase{\textbf{\facultad}} \\
+}
 \end{center}
 
 \bigskip
@@ -23,45 +30,50 @@
 %
 \begin{figure}[h]
 	\begin{center}
-		\includegraphics[scale=0.35]{\logoizq}
+		\includegraphics[height=1in]{\logoizq}
     \hspace{1cm}
-		\includegraphics[scale=0.4]{\logoder}
-	\end{center}	
+		\includegraphics[height=1.1in]{\logoder}
+	\end{center}
 \end{figure}
 
-\bigskip
-\bigskip
-\bigskip
-
-% Máster
-\begin{center}
-\begin{large}
-\textbf{\master}\\
-\end{large}
-\end{center}
-
-\bigskip
+%\bigskip
 
 \textbf{\begin{center}
-\begin{huge}
-\MakeUppercase{Trabajo de Fin de Máster}
-\end{huge}
+{\fontsize{18}{22}\selectfont
+\MakeUppercase{Trabajo Fin de Máster}
+}
 \end{center}}
 
 \bigskip
 \bigskip
 
-% Nombre del TFG
+% Nombre del TFM
+{\fontsize{26}{31}\selectfont
 \begin{center}
-\textbf{\begin{large}
-\MakeUppercase{\nombretrabajo}\\
-\end{large}}
+\textbf{{\nombretrabajo}}
 \end{center}
+}
 
+\bigskip
+\bigskip
+
+% Máster
+{\fontsize{18}{22}\selectfont
+\begin{center}
+\begin{large}
+\textbf{\master}\\
+\end{large}
+\end{center}
+}
+
+\bigskip
+\bigskip
+
+{\fontsize{16}{19}\selectfont
 % Nombre del autor
 \vspace{\fill}
 \begin{center}
-\textbf{\nombreautor}\\
+\textbf{Autor: \nombreautor}\\
 % Tutor
 \textbf{Tutor: \nombretutor}\\
 % Ponente, si está definido en main.tex
@@ -70,13 +82,17 @@
 \fi
 
 \bigskip
+\bigskip
 
 % Fecha
 \textbf{\fecha}\\
 \end{center}
+}
 \end{titlepage}
 
-% Primera página
+
+
+%%%%%%%%%%%%%%%%%%%%%%%% Primera página %%%%%%%%%%%%%%%%%%%%%%%%
 \pagenumbering{Alph}
 \thispagestyle{empty}
 \par\vspace*{\fill}
